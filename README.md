@@ -5,19 +5,19 @@ It allows people from different countries to chat in their own languages without
 
 
 ### Functionnalities 
-Must have : 
+- Must have : 
 
 	* Send / Receive messages in a general chat room	(Week 1)
 	* Translate automatically your messages (Week 1)
 	* Modern UI (Week 1)
 
-Should have : 
+- Should have : 
 	
 	* Simple login system with an username and a language (End of week 1)
 	* Send / Receive messages from a specific user (End of week 1)
 	* Send / Receive messages from a specific chat room (End of week 1)
 
-Nice to have : 
+- Nice to have : 
 
 	* Edit chat rooms (Week 2)
 	* Animations (Week 2)
