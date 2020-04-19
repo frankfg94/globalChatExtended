@@ -55,7 +55,7 @@ export default {
     },
     message (data) { // this function gets triggered once a socket event of `message` is received
       console.log('received')
-      this.messages.push({ author: 'auteur', content: data })
+      this.messages.push({ author: 'auteur', content: data.original })
     }
   },
 
