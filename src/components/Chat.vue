@@ -1,20 +1,19 @@
-    <template>
-    <v-container>
+<template>
+  <v-container>
     <div ref="scrollbar" class="c-chat mb-3 pa-6">
-        <v-scroll>
       <p v-if="messages.length === 0">Welcome to Global Chat</p>
-        <v-list-item class ="messages" v-for="(item) in messages" :key="item.id">
-          <v-list-item-content>
+      <v-list-item class ="messages" v-for="(item) in messages" :key="item.id">
+        <v-list-item-content>
           <v-list-item-subtitle>{{ item.author }}</v-list-item-subtitle>
-           <v-list-item-title>{{ item.content }}</v-list-item-title>
-         </v-list-item-content>
-        </v-list-item>
-        </v-scroll>
+          <v-list-item-title>{{ item.original }}  <v-icon x-small color=blue @click="item.showTranslation = !item.showTranslation">fas fa-language</v-icon></v-list-item-title>
+          <v-list-item-subtitle v-if="item.showTranslation">{{ item.translation }}</v-list-item-subtitle>
+        </v-list-item-content>
+      </v-list-item>
     </div>
     <div class="c-form mx-6 my-2">
       <v-flex xs12>
-    <v-text-field label="Your message" outline v-model="message" @keydown.enter="sendMessage"/>
-  </v-flex>
+        <v-text-field label="Your message" outline v-model="message" @keydown.enter="sendMessage"/>
+      </v-flex>
     </div>
   </v-container>
 </template>
@@ -53,9 +52,9 @@ export default {
     count (val) {
       this.count = val.count
     },
-    message (data) { // this function gets triggered once a socket event of `message` is received
+    async translatedmessage (data) { // this function gets triggered once a socket event of `message` is received
       console.log('received')
-      this.messages.push({ author: 'auteur', content: data.original })
+      this.messages.push({ author: 'auteur', original: data.original, translation: data.translation, showTranslation: false })
     }
   },
 
