@@ -68,7 +68,7 @@ export default {
 
   methods: {
     sendMessage: function () {
-      if (this.message) {
+      if (this.message.trim()) {
         this.$socket.emit('message', this.message)
         this.message = '' // clear the box
       }
