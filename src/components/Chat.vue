@@ -5,10 +5,10 @@
       <v-card-text>
         <p v-if="messages.length === 0">Welcome to Global Chat</p>
         <v-list-item class ="messages" v-for="(item) in messages" :key="item.id">
-          <v-list-item-content>{{item.message}}
-          <!--<v-list-item-title>{{ item.author }}</v-list-item-title>
-          <v-list-item-subtitle>{{ item.content }}</v-list-item-subtitle>-->
-          </v-list-item-content>
+          <v-list-item-content>
+          <v-list-item-subtitle>{{ item.author }}</v-list-item-subtitle>
+           <v-list-item-title>{{ item.content }}</v-list-item-title>
+         </v-list-item-content>
         </v-list-item>
       </v-card-text>
     </v-card>
@@ -57,7 +57,7 @@ export default {
     },
     message (data) { // this function gets triggered once a socket event of `message` is received
       console.log('received')
-      this.messages.push({ message: data }) // append each new message to the textarea and add a line break
+      this.messages.push({ author: 'auteur', content: data.original }) // append each new message to the textarea and add a line break
     }
   },
 
