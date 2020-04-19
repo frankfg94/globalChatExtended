@@ -4,7 +4,7 @@
       <p v-if="messages.length === 0">Welcome to Global Chat</p>
       <v-list-item class ="messages" v-for="(item) in messages" :key="item.id">
         <v-list-item-content>
-          <v-list-item-subtitle>{{ item.author }}</v-list-item-subtitle>
+          <v-list-item-subtitle><v-icon class="mx-2">{{item.icon}}</v-icon>{{ item.author }}</v-list-item-subtitle>
           <v-list-item-title>{{ item.original }}  <v-icon x-small color=blue @click="item.showTranslation = !item.showTranslation">fas fa-language</v-icon></v-list-item-title>
           <v-list-item-subtitle v-if="item.showTranslation">{{ item.translation }}</v-list-item-subtitle>
         </v-list-item-content>
@@ -42,7 +42,11 @@ export default {
 
   data: () => ({
     message: '',
-    messages: []
+    messages: [],
+    user: {
+      username: 'auteur',
+      icon: 'fas fa-hand-middle-finger'
+    }
   }),
 
   sockets: {
@@ -54,7 +58,7 @@ export default {
     },
     async translatedmessage (data) { // this function gets triggered once a socket event of `message` is received
       console.log('received')
-      this.messages.push({ author: 'auteur', original: data.original, translation: data.translation, showTranslation: false })
+      this.messages.push({ author: 'auteur', original: data.original, translation: data.translation, showTranslation: false, icon: this.user.icon })
     }
   },
 
@@ -65,13 +69,18 @@ export default {
       })
     }
   },
-
   methods: {
     sendMessage: function () {
       if (this.message.trim()) {
         this.$socket.emit('message', this.message)
         this.message = '' // clear the box
       }
+    }
+  },
+  mounted: function () {
+    console.log('mounted:' + JSON.stringify(this.$route.params))
+    if (this.$route.params.username !== null && this.$route.params.username !== undefined) {
+      this.user = this.$route.params
     }
   }
 
