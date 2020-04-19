@@ -3,10 +3,20 @@
     <div ref="scrollbar" class="c-chat mb-3 pa-6">
       <p v-if="messages.length === 0">Welcome to Global Chat</p>
       <v-list-item class ="messages" v-for="(item) in messages" :key="item.id">
-        <v-list-item-content>
-          <v-list-item-subtitle>{{ item.author }}</v-list-item-subtitle>
-          <v-list-item-title>{{ item.original }}  <v-icon x-small color=blue @click="item.showTranslation = !item.showTranslation">fas fa-language</v-icon></v-list-item-title>
-          <v-list-item-subtitle v-if="item.showTranslation">{{ item.translation }}</v-list-item-subtitle>
+        <v-list-item-content style="padding:0">
+          <v-row>
+            <v-col cols="11">
+              <v-list-item-subtitle>{{ item.author }}</v-list-item-subtitle>
+              <v-list-item-title>
+                  {{ item.original }}
+              </v-list-item-title>
+              <v-list-item-subtitle v-if="item.showTranslation">{{ item.translation }}</v-list-item-subtitle>
+            </v-col>
+            <v-col cols="1">
+              <v-icon medium color=blue @click="item.showTranslation = !item.showTranslation">fas fa-language</v-icon>
+            </v-col>
+          </v-row>
+          <v-divider></v-divider>
         </v-list-item-content>
       </v-list-item>
     </div>
@@ -46,7 +56,7 @@ export default {
   }),
 
   sockets: {
-    connect () {
+    connect (val) {
       console.log('connected to chat server')
     },
     count (val) {
@@ -54,7 +64,23 @@ export default {
     },
     async translatedmessage (data) { // this function gets triggered once a socket event of `message` is received
       console.log('received')
-      this.messages.push({ author: 'auteur', original: data.original, translation: data.translation, showTranslation: false })
+      this.messages.push({
+        author: 'auteur',
+        original: data.original,
+        translation: data.translation,
+        showTranslation: false
+      })
+    },
+    async getHistory (dataTab) {
+      for (var i = 0; i < dataTab.length; i++) {
+        this.messages.push({
+          author: 'auteur',
+          original: dataTab[i].original,
+          translation: dataTab[i].translation,
+          showTranslation: false
+        })
+        if (i === 19) { break } // get 20 previous message
+      }
     }
   },
 
