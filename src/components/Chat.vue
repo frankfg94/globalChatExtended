@@ -1,42 +1,40 @@
-<template>
-  <v-container fluid grid-list-sm fill-height>
-    <v-layout column justify-center justify-space-between wrap>
-    <v-card height="100%">
-      <v-card-text>
-        <p v-if="messages.length === 0">Welcome to Global Chat</p>
+    <template>
+    <v-container>
+    <div ref="scrollbar" class="c-chat mb-3 pa-6">
+        <v-scroll>
+      <p v-if="messages.length === 0">Welcome to Global Chat</p>
         <v-list-item class ="messages" v-for="(item) in messages" :key="item.id">
-          <v-list-item-content>{{item.message}}
-          <!--<v-list-item-title>{{ item.author }}</v-list-item-title>
-          <v-list-item-subtitle>{{ item.content }}</v-list-item-subtitle>-->
-          </v-list-item-content>
+          <v-list-item-content>
+          <v-list-item-subtitle>{{ item.author }}</v-list-item-subtitle>
+           <v-list-item-title>{{ item.content }}</v-list-item-title>
+         </v-list-item-content>
         </v-list-item>
-      </v-card-text>
-    </v-card>
-    <v-card fixed>
-        <v-text-field
-          v-model="message"
-          label="your message"
-          single-line>
-        </v-text-field>
-        <div class="my-3">
-          <v-btn color="primary" height="40"
-            @click="sendMessage()">Send</v-btn>
-        </div>
-    </v-card>
-    </v-layout>
+        </v-scroll>
+    </div>
+    <div class="c-form mx-6 my-2">
+      <v-flex xs12>
+    <v-text-field label="Your message" outline v-model="message" @keydown.enter="sendMessage"/>
+  </v-flex>
+    </div>
   </v-container>
 </template>
 
 <style>
-      * { margin: 0; padding: 0; box-sizing: border-box; }
-      body { font: 13px Helvetica, Arial; }
-      form { background: #000; padding: 3px; position: fixed; bottom: 0; width: 100%; }
-      form input { border: 0; padding: 10px; width: 90%; margin-right: 0.5%; }
-      form button { width: 9%; background: rgb(130, 224, 255); border: none; padding: 10px; }
-      #messages { list-style-type: none; margin: 0; padding: 0; }
-      #messages li { padding: 5px 10px; }
-      #messages li:nth-child(odd) { background: #eee; }
-    </style>
+.c-form {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+}
+.c-chat {
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: 0;
+  bottom: 60px;
+  overflow-y: auto;
+}
+</style>
 
 <script>
 
@@ -57,14 +55,24 @@ export default {
     },
     message (data) { // this function gets triggered once a socket event of `message` is received
       console.log('received')
-      this.messages.push({ message: data }) // append each new message to the textarea and add a line break
+      this.messages.push({ author: 'auteur', content: data })
+    }
+  },
+
+  watch: {
+    messages () {
+      setTimeout(() => {
+        this.$refs.scrollbar.scrollTop = this.$refs.scrollbar.scrollHeight
+      })
     }
   },
 
   methods: {
     sendMessage: function () {
-      this.$socket.emit('message', this.message)
-      this.message = '' // clear the box
+      if (this.message) {
+        this.$socket.emit('message', this.message)
+        this.message = '' // clear the box
+      }
     }
   }
 
