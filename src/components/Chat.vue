@@ -59,10 +59,8 @@
 </style>
 
 <script>
-
 export default {
   name: 'Chatpage',
-
   data: () => ({
     roomName: 'Général',
     message: '',
@@ -72,7 +70,6 @@ export default {
     },
     users: []
   }),
-
   sockets: {
     connect (val) {
       console.log('connected to chat server')
@@ -96,19 +93,15 @@ export default {
       })
     }
   },
-
   watch: {
-    messages () {
-      setTimeout(() => {
-        this.$refs.scrollbar.scrollTop = this.$refs.scrollbar.scrollHeight
-      })
-    },
     name (newName) {
       this.name = localStorage.name
     }
   },
-
   methods: {
+    ScrollEnd () {
+      this.$refs.scrollbar.scrollTop = this.$refs.scrollbar.scrollHeight
+    },
     sendMessage: function () {
       if (this.message.trim()) {
         const msg = { date: Date.now(), original: this.message, author: this.$store.getters.user }
@@ -134,26 +127,13 @@ export default {
   mounted: function () {
     if (sessionStorage.getItem('user') !== null) {
       this.$store.commit('setUser', JSON.parse(sessionStorage.getItem('user')))
-    } else {
-      sessionStorage.setItem('user', JSON.stringify(this.$store.getters.user))
-      // this.assignUserList()
-    }
-
-    // Fetch user list
-    console.log('User list : ' + JSON.stringify(this.users))
-    for (let i = 0; i < this.users.length; i++) {
-      // this.$socket.to(this.user.username + '-' + this.users[i].username).emit('utuCreated', this.$store.user)
-    }
-  },
-
-  mounted: function () {
-    if (sessionStorage.getItem('user') !== null) {
-      this.$store.commit('setUser', JSON.parse(sessionStorage.getItem('user')))
     }
     if (sessionStorage.getItem('messages') !== null) {
       this.$store.commit('setMessages', JSON.parse(sessionStorage.getItem('messages')))
     }
+  },
+  updated () {
+    this.ScrollEnd()
   }
-
 }
 </script>

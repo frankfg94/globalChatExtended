@@ -70,7 +70,6 @@
 </template>
 
 <script>
-import { store } from '../store/store.js'
 export default {
   name: 'Join',
   data: () => ({
