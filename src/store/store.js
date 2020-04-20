@@ -7,7 +7,11 @@ Vue.use(Vuex)
 export const store = new Vuex.Store({
   state: {
     targetLang: 'en',
-    messages: []
+    messages: [],
+    user: {
+      username: 'anonyme',
+      icon: 'fas fa-hand-middle-finger'
+    }
   },
 
   mutations: {
@@ -15,14 +19,19 @@ export const store = new Vuex.Store({
       state.targetLang = lang
     },
     addMessage (state, msg) {
+      console.log(msg)
       state.messages.push(msg)
     },
     changeVisibility (state, idx) {
       state.messages[idx].showTranslation = !state.messages[idx].showTranslation
     },
     modifyMessage (state, msg) {
-      console.log('modify ' + msg.translation)
       state.messages[state.messages.findIndex(x => x.date === msg.date)] = msg
+    },
+    setUser (state, user) {
+      console.log(user.username + user.icon)
+      state.user.username = user.username
+      state.user.icon = user.icon
     }
   },
 
@@ -55,6 +64,7 @@ export const store = new Vuex.Store({
 
   getters: {
     targetLang: state => state.targetLang,
-    messages: state => state.messages
+    messages: state => state.messages,
+    user: state => state.user
   }
 })

@@ -1,16 +1,16 @@
 <template>
   <v-container>
     <div ref="scrollbar" class="c-chat mb-3 pa-6">
-      <p v-if="$store.getters.messages.length === 0">Welcome to Global Chat</p>
+      <h1 v-if="$store.getters.messages.length === 0">Welcome to Global Chat</h1>
       <v-list-item class ="messages" v-for="(item,idx) in $store.getters.messages" :key="item.date">
         <v-list-item-content style="padding:0">
           <v-row>
             <v-col cols="11">
-              <v-list-item-subtitle>{{ item.author }}</v-list-item-subtitle>
-              <v-list-item-title>
+              <v-list-item-subtitle><v-icon class="mx-2">{{item.author.icon}}</v-icon>{{ item.author.username }}</v-list-item-subtitle>
+              <v-list-item-title class="mx-10">
                   {{ item.original }}
               </v-list-item-title>
-              <v-list-item-subtitle v-if="item.showTranslation">{{ item.translation[0] }}</v-list-item-subtitle>
+              <v-list-item-subtitle class="mx-10" v-if="item.showTranslation">{{ item.translation[0] }}</v-list-item-subtitle>
             </v-col>
             <v-col cols="1">
               <v-icon medium color=blue @click="getTranslation(idx)">fas fa-language</v-icon>
@@ -52,8 +52,10 @@ export default {
 
   data: () => ({
     message: '',
-    messages: [],
-    targetLanguage: 'en'
+    user: {
+      username: 'anonyme',
+      icon: 'fas fa-hand-middle-finger'
+    }
   }),
 
   sockets: {
@@ -64,14 +66,16 @@ export default {
       this.count = val.count
     },
     async newMessage (data) { // this function gets triggered once a socket event of `message` is received
-      console.log('received')
+      console.log(data.author)
       this.$store.commit('addMessage', {
-        date: Date.now(),
-        author: 'auteur',
+        date: data.date,
+        author: {
+          username: data.author.username,
+          icon: data.author.icon
+        },
         original: data.original,
         showTranslation: false
       })
-      console.log(this.targetLanguage)
     }
   },
 
@@ -86,9 +90,8 @@ export default {
   methods: {
     sendMessage: function () {
       if (this.message.trim()) {
-        this.targetLanguage = this.$store.getters.targetLang
-        console.log(this.targetLanguage)
-        this.$socket.emit('message', { text: this.message, ui: this.targetLanguage })
+        const msg = { date: Date.now(), original: this.message, author: this.$store.getters.user }
+        this.$socket.emit('message', msg)
         this.message = '' // clear the box
       }
     },
