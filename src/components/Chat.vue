@@ -32,14 +32,14 @@
 .c-form {
   position: absolute;
   bottom: 0;
-  left: 0;
+  left: 300px;
   right: 0;
 }
 .c-chat {
   position: absolute;
   top: 0;
   right: 0;
-  left: 0;
+  left: 300px;
   bottom: 60px;
   overflow-y: auto;
 }
