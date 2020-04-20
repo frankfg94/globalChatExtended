@@ -21,18 +21,23 @@ export const store = new Vuex.Store({
     addMessage (state, msg) {
       console.log(msg)
       state.messages.push(msg)
+      sessionStorage.setItem('messages', JSON.stringify(state.messages))
     },
     changeVisibility (state, idx) {
       state.messages[idx].showTranslation = !state.messages[idx].showTranslation
     },
     modifyMessage (state, msg) {
       state.messages[state.messages.findIndex(x => x.date === msg.date)] = msg
+      sessionStorage.setItem('messages', JSON.stringify(state.messages))
     },
     setUser (state, user) {
-      console.log(user.username + user.icon)
       state.user.username = user.username
       state.user.icon = user.icon
       sessionStorage.setItem('user', JSON.stringify(state.user))
+    },
+    setMessages (state, msgs) {
+      state.messages = msgs
+      sessionStorage.setItem('messages', JSON.stringify(state.messages))
     }
   },
 

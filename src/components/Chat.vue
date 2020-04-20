@@ -144,6 +144,15 @@ export default {
     for (let i = 0; i < this.users.length; i++) {
       // this.$socket.to(this.user.username + '-' + this.users[i].username).emit('utuCreated', this.$store.user)
     }
+  },
+
+  mounted: function () {
+    if (sessionStorage.getItem('user') !== null) {
+      this.$store.commit('setUser', JSON.parse(sessionStorage.getItem('user')))
+    }
+    if (sessionStorage.getItem('messages') !== null) {
+      this.$store.commit('setMessages', JSON.parse(sessionStorage.getItem('messages')))
+    }
   }
 
 }

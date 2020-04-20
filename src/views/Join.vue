@@ -91,8 +91,7 @@ export default {
   }),
   methods: {
     async submit () {
-      store.commit('setUser', { username: this.username.trim(), icon: this.icon.ic })
-      console.log(this.icon.ic)
+      this.$store.commit('setUser', { username: this.username.trim(), icon: this.icon.ic })
       this.$router.push({ name: 'Chat' })
     }
   },

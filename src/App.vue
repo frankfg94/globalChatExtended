@@ -31,7 +31,6 @@
                 v-model="targetLanguage"
                 :items="supportedLanguages"
                 label="Languages"
-                item-value="text"
                 @change="validateLangChange"
               ></v-select>
             </v-card-text>
@@ -67,38 +66,43 @@ export default {
 
   data: () => ({
     langDialogue: false,
-    supportedLanguages: [
-      { text: 'English', ui: 'en' },
-      { text: 'Spanish', ui: 'es' },
-      { text: 'French', ui: 'fr' }
-    ],
+    supportedLanguages: [],
     targetLanguage: 'English'
   }),
 
   methods: {
-    getSupportedLanguages: async function (text, targetLanguage) {
-      const key = 'trnsl.1.1.20200419T135148Z.c4fac443bbed2781.b22675d40250840dd99e7ad5aec754f224de4dc1'
-      const requestURL = 'https://translate.yandex.net/api/v1.5/tr.json/getLangs'
-      const response = await axios.get(requestURL, {
-        params: {
-          key: key,
-          text: text,
-          ui: 'en'
-        }
-      })
-      const responseOK = response && response.status === 200 && response.statusText === 'OK'
-      if (responseOK) {
-        console.log('Translated text: ' + response.data.text)
-        return { original: text, translation: response.data.text[0] }
-      } else {
-        return { original: text, translation: 'Erreur de traduction' }
-      }
-    },
-
     validateLangChange: function () {
       console.log(this.supportedLanguages.find(item => item.text === this.targetLanguage).ui)
       this.$store.commit('changeLang', this.supportedLanguages.find(item => item.text === this.targetLanguage).ui)
+    },
+    customSort: function (a, b) {
+      return a.text.localeCompare(b.text)
     }
+  },
+
+  mounted: function () {
+    this.$nextTick(async function () {
+      const key = 'trnsl.1.1.20200419T135148Z.c4fac443bbed2781.b22675d40250840dd99e7ad5aec754f224de4dc1'
+      const requestURL = 'https://translate.yandex.net/api/v1.5/tr.json/getLangs'
+      await axios.post(requestURL, null, {
+        params: {
+          key: key,
+          ui: 'en'
+        }
+      }).then(response => {
+        const data = response.data.langs
+        const langs = []
+        Object.entries(data).map(function (key) {
+          langs.push({
+            ui: key[0],
+            text: key[1]
+          })
+        })
+        this.supportedLanguages = langs.sort(this.customSort)
+      }).catch(error => {
+        console.log(error)
+      })
+    })
   }
 }
 </script>
