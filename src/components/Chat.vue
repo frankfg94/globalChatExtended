@@ -1,12 +1,22 @@
 <template>
   <v-container>
     <div ref="scrollbar" class="c-chat mb-3 pa-6">
-      <p v-if="messages.length === 0">Welcome to Global Chat</p>
-      <v-list-item class ="messages" v-for="(item) in messages" :key="item.id">
-        <v-list-item-content>
-          <v-list-item-subtitle><v-icon class="mx-2">{{item.icon}}</v-icon>{{ item.author }}</v-list-item-subtitle>
-          <v-list-item-title>{{ item.original }}  <v-icon x-small color=blue @click="item.showTranslation = !item.showTranslation">fas fa-language</v-icon></v-list-item-title>
-          <v-list-item-subtitle v-if="item.showTranslation">{{ item.translation }}</v-list-item-subtitle>
+      <p v-if="$store.getters.messages.length === 0">Welcome to Global Chat</p>
+      <v-list-item class ="messages" v-for="(item,idx) in $store.getters.messages" :key="item.date">
+        <v-list-item-content style="padding:0">
+          <v-row>
+            <v-col cols="11">
+              <v-list-item-subtitle>{{ item.author }}</v-list-item-subtitle>
+              <v-list-item-title>
+                  {{ item.original }}
+              </v-list-item-title>
+              <v-list-item-subtitle v-if="item.showTranslation">{{ item.translation[0] }}</v-list-item-subtitle>
+            </v-col>
+            <v-col cols="1">
+              <v-icon medium color=blue @click="getTranslation(idx)">fas fa-language</v-icon>
+            </v-col>
+          </v-row>
+          <v-divider></v-divider>
         </v-list-item-content>
       </v-list-item>
     </div>
@@ -43,22 +53,25 @@ export default {
   data: () => ({
     message: '',
     messages: [],
-    user: {
-      username: 'auteur',
-      icon: 'fas fa-hand-middle-finger'
-    }
+    targetLanguage: 'en'
   }),
 
   sockets: {
-    connect () {
+    connect (val) {
       console.log('connected to chat server')
     },
     count (val) {
       this.count = val.count
     },
-    async translatedmessage (data) { // this function gets triggered once a socket event of `message` is received
+    async newMessage (data) { // this function gets triggered once a socket event of `message` is received
       console.log('received')
-      this.messages.push({ author: 'auteur', original: data.original, translation: data.translation, showTranslation: false, icon: this.user.icon })
+      this.$store.commit('addMessage', {
+        date: Date.now(),
+        author: 'auteur',
+        original: data.original,
+        showTranslation: false
+      })
+      console.log(this.targetLanguage)
     }
   },
 
@@ -69,18 +82,22 @@ export default {
       })
     }
   },
+
   methods: {
     sendMessage: function () {
       if (this.message.trim()) {
-        this.$socket.emit('message', this.message)
+        this.targetLanguage = this.$store.getters.targetLang
+        console.log(this.targetLanguage)
+        this.$socket.emit('message', { text: this.message, ui: this.targetLanguage })
         this.message = '' // clear the box
       }
-    }
-  },
-  mounted: function () {
-    console.log('mounted:' + JSON.stringify(this.$route.params))
-    if (this.$route.params.username !== null && this.$route.params.username !== undefined) {
-      this.user = this.$route.params
+    },
+
+    async getTranslation (idx) {
+      if (!this.$store.getters.messages[idx].showTranslation) {
+        await this.$store.dispatch('translateMessage', idx)
+      }
+      this.$store.commit('changeVisibility', idx)
     }
   }
 
