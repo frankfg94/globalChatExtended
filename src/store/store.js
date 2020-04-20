@@ -9,8 +9,8 @@ export const store = new Vuex.Store({
     targetLang: 'en',
     messages: [],
     user: {
-      username: 'anonyme',
-      icon: 'fas fa-hand-middle-finger'
+      username: '',
+      icon: ''
     }
   },
 
@@ -32,6 +32,7 @@ export const store = new Vuex.Store({
       console.log(user.username + user.icon)
       state.user.username = user.username
       state.user.icon = user.icon
+      sessionStorage.setItem('user', JSON.stringify(state.user))
     }
   },
 
@@ -68,3 +69,5 @@ export const store = new Vuex.Store({
     user: state => state.user
   }
 })
+
+export default store

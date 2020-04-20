@@ -70,6 +70,7 @@
 </template>
 
 <script>
+import { store } from '../store/store.js'
 export default {
   name: 'Join',
   data: () => ({
@@ -90,7 +91,7 @@ export default {
   }),
   methods: {
     async submit () {
-      this.$store.commit('setUser', { username: this.username.trim(), icon: this.icon.ic })
+      store.commit('setUser', { username: this.username.trim(), icon: this.icon.ic })
       console.log(this.icon.ic)
       this.$router.push({ name: 'Chat' })
     }
