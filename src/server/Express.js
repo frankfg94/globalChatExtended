@@ -3,17 +3,36 @@ const axios = require('axios')
 const { get, socket } = require('server/router')
 
 const port = process.env.PORT || 3001
+const allUsers = []
 
 server({ port }, [
   get('/', ctx => '<h1>Hello you!</h1>'),
   socket('message', async ctx => {
-    // Send the message to every socket
-    const msg = await getMessageWithTranslation(ctx.data, 'en')
-    ctx.io.emit('translatedmessage', msg)
+    // Send the message to every socket format : {text,username,icon}
+    console.log('ctx' + JSON.stringify(ctx.data))
+
+    const msg = await getMessageWithTranslation(ctx.data.text, 'en')
+    ctx.io.emit('translatedmessage', { author: ctx.data.username, original: msg.original, translation: msg.translation, showTranslation: false, icon: ctx.data.icon })
   }),
+
+  // Triggered automatically
   socket('connect', ctx => {
+    allUsers.push(ctx)
     console.log('client connected', Object.keys(ctx.io.sockets.sockets))
     ctx.io.emit('count', { msg: 'HI U', count: Object.keys(ctx.io.sockets.sockets).length })
+
+    // Triggered automatically
+    socket('disconnect', ctx => {
+      console.log('client disconnected', Object.keys(ctx.io.sockets.sockets))
+      ctx.io.emit('userDisconnectedGetData')
+    })
+  }),
+  socket('userConnected', async ctx => {
+    allUsers.push(ctx.data)
+    ctx.io.emit('userConnected', ctx.data)
+  }),
+  socket('userDisconnectedNotify', async ctx => {
+    ctx.io.emit('userDisconnectedNotify', ctx.data)
   })
 ])
   .then(() => console.log(`Server running at http://localhost:${port}`))
