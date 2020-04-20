@@ -58,7 +58,7 @@ export default {
     },
     async translatedmessage (data) { // this function gets triggered once a socket event of `message` is received
       console.log('received')
-      this.messages.push({ author: 'auteur', original: data.original, translation: data.translation, showTranslation: false, icon: this.user.icon })
+      this.messages.push({ author: this.user.username, original: data.original, translation: data.translation, showTranslation: false, icon: this.user.icon })
     }
   },
 
