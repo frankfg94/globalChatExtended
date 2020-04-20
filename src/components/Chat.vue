@@ -102,6 +102,15 @@ export default {
       }
       this.$store.commit('changeVisibility', idx)
     }
+  },
+
+  mounted: function () {
+    if (sessionStorage.getItem('user') !== null) {
+      this.$store.commit('setUser', JSON.parse(sessionStorage.getItem('user')))
+    }
+    if (sessionStorage.getItem('messages') !== null) {
+      this.$store.commit('setMessages', JSON.parse(sessionStorage.getItem('messages')))
+    }
   }
 
 }
