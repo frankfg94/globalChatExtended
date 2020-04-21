@@ -13,14 +13,15 @@
 
       <v-btn
         v-if="logged"
-        color="primary"
+        color="blue darken-1"
         font-color="primary"
         @click="langDialogue = !langDialogue"
       >languages
       </v-btn>
-       <v-btn
+       <v-btn text
         v-if="logged"
-        color="primary"
+        class="mx-3"
+        color=white
         font-color="primary"
         @click="disconnect"
       >

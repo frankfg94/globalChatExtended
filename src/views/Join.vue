@@ -76,6 +76,7 @@ export default {
     el: '#app',
     valid: false,
     username: '',
+    logged: false,
     icons: [
       { ic: 'far fa-angry', title: 'En colère' },
       { ic: 'far fa-laugh-beam', title: 'Content' },
@@ -92,13 +93,28 @@ export default {
     async submit () {
       this.$store.commit('setUser', { username: this.username.trim(), icon: this.icon.ic })
       this.$router.push({ name: 'Chat' })
+    },
+    userConnected: function () {
+      console.log('log user : ' + sessionStorage.getItem('user'))
+      if (sessionStorage.getItem('user')) {
+        return true
+      } else {
+        return false
+      }
     }
   },
   mounted: function () {
     this.$nextTick(function () {
+      if (this.userConnected()) {
+        const user = JSON.parse(sessionStorage.getItem('user'))
+        console.log('Loading previous user' + JSON.stringify(user))
+        this.username = user.username
+        this.icon = this.icons.find(el => el.ic === user.icon)
+      } else {
       // Choix d'un émoticone aléatoire
-      const randomId = Math.floor(Math.random() * Math.floor(this.icons.length))
-      this.icon = this.icons[randomId]
+        const randomId = Math.floor(Math.random() * Math.floor(this.icons.length))
+        this.icon = this.icons[randomId]
+      }
     })
   }
 }
