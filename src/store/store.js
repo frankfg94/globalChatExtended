@@ -11,7 +11,8 @@ export const store = new Vuex.Store({
     user: {
       username: '',
       icon: ''
-    }
+    },
+    userList: []
   },
 
   mutations: {
@@ -38,6 +39,9 @@ export const store = new Vuex.Store({
     setMessages (state, msgs) {
       state.messages = msgs
       sessionStorage.setItem('messages', JSON.stringify(state.messages))
+    },
+    usersChanged (state, users) {
+      state.userList = users
     }
   },
 
@@ -71,7 +75,8 @@ export const store = new Vuex.Store({
   getters: {
     targetLang: state => state.targetLang,
     messages: state => state.messages,
-    user: state => state.user
+    user: state => state.user,
+    userList: state => state.userList
   }
 })
 

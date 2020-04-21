@@ -6,33 +6,29 @@ const allClients = []
 server({ port }, [
   get('/', ctx => '<h1>Hello you!</h1>'),
   socket('message', ctx => {
-    // Send the message to every socket
     ctx.io.emit('newMessage', ctx.data)
   }),
 
-  socket('connect', ctx => {
-    console.log('client connected', Object.keys(ctx.io.sockets.sockets))
-    //  allClients.push(ctx)
-    socket('changeRoom', function (roomName) {
-      console.log('Client ' + ctx.socket.id + ' joined the room : ' + roomName)
-      socket.join(roomName)
-    })
+  socket('connection', ctx => {
     /*
     socket('disconnect', function () {
       var i = allClients.indexOf(ctx)
       allClients.splice(i, 1)
     })
     */
+    socket('changeRoom', () => {
+      console.log('sans rien')
+      console.log('Client ' + ctx.socket.id + ' joined the room : ' + ctx.data)
+      ctx.join(ctx.data)
+    })
   }),
-  socket('userList', ctx => {
-    var allClientsFormatted = []
-    if (allClients.find(x => x.ctx === ctx) === undefined) {
-      allClients.push({ ctx: ctx, username: ctx.data.username })
+
+  socket('userRegistered', ctx => {
+    const user = ctx.data
+    if (allClients.find(x => x.username === user.username) === undefined) {
+      allClients.push(ctx.data)
     }
-    for (let i = 0; i < allClients.length; i++) {
-      allClientsFormatted.push({ username: allClients[i].username })
-    }
-    ctx.io.emit('userListObtained', allClientsFormatted)
+    ctx.io.emit('newUserJoined', allClients)
   })
 ])
   .then(() => console.log(`Server running at http://localhost:${port}`))
