@@ -33,7 +33,7 @@
               <v-card-text>
                 <v-form>
                   <v-text-field
-                    label="Ton pseudo"
+                    label="Your username"
                     v-model="username"
                     :rules="pseudoRules"
                     type="text"
@@ -47,7 +47,7 @@
                     </v-col>
                     <v-col>
                       <v-combobox
-                        label="Icone"
+                        label="Icon"
                         v-model="icon"
                         :item-value="icon.ic"
                         :items="icons"
@@ -74,7 +74,7 @@
                 <v-btn
                 color="primary"
                 :disabled="!username"
-                @click="submitUnique">C'est parti</v-btn>
+                @click="submitUnique">Let's go</v-btn>
               </v-card-actions>
             </v-card>
           </v-col>
@@ -104,6 +104,7 @@ export default {
       (username) => /^(?!\s*$).+/.test(username) || "Le pseudo ne doit pas être constitué d'espaces vides"
     ]
   }),
+
   methods: {
     async submit () {
       console.log('submit')
@@ -112,7 +113,7 @@ export default {
     },
     // Ensure that that an user with the same name is not already connected
     async submitUnique () {
-      this.$socket.emit('getUserList')
+      this.$socket.emit('getUserList', this.$store.getters.user)
     },
     userConnected: function () {
       console.log('log user : ' + sessionStorage.getItem('user'))
@@ -139,12 +140,14 @@ export default {
   mounted: function () {
     this.$nextTick(function () {
       if (this.userConnected()) {
+        this.$socket.emit('userGone', this.$store.getters.user)
         const user = JSON.parse(sessionStorage.getItem('user'))
         console.log('Loading previous user' + JSON.stringify(user))
         this.username = user.username
         this.icon = this.icons.find(el => el.ic === user.icon)
       } else {
       // Choix d'un émoticone aléatoire
+        console.log('else')
         const randomId = Math.floor(Math.random() * Math.floor(this.icons.length))
         this.icon = this.icons[randomId]
       }

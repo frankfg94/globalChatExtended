@@ -53,6 +53,14 @@ export default {
     message: '',
     users: []
   }),
+
+  beforeMount () {
+    window.addEventListener('beforeunload', this.beforeLeaving)
+    this.$once('hook:beforeDestroy', () => {
+      window.removeEventListener('beforeunload', this.beforeLeaving)
+    })
+  },
+
   sockets: {
     connect (val) {
       console.log('connected to chat server')
@@ -75,7 +83,7 @@ export default {
         showTranslation: false
       })
     },
-    newUserJoined (data) {
+    userListChanged (data) {
       this.$store.commit('usersChanged', data)
     }
   },
@@ -103,13 +111,17 @@ export default {
     },
     assignUserList: function () {
       this.$socket.emit('userList', this.$store.getters.user)
+    },
+    beforeLeaving: function (event) {
+      this.$socket.emit('refresh', this.$store.getters.user)
+      return 'ok'
     }
   },
   mounted: function () {
     if (sessionStorage.getItem('user') !== null) {
       this.$store.commit('setUser', JSON.parse(sessionStorage.getItem('user')))
     }
-    this.$socket.emit('userRegistered', this.$store.getters.user)
+    this.$socket.emit('userRegistered', this.$store.getters.user) // JSON.parse(sessionStorage.getItem('user')))
     if (sessionStorage.getItem('messages') !== null) {
       this.$store.commit('setMessages', JSON.parse(sessionStorage.getItem('messages')))
     }
