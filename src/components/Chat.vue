@@ -1,20 +1,7 @@
 <template>
   <v-container>
     <div ref="scrollbar" class="c-chat mb-3 pa-6">
-      <h1>Conversation : {{roomName}}</h1>
-      <h1 v-if="$store.getters.messages.length === 0">Welcome to Global Chat</h1>
-      <v-list-item  @click="changeRoom(this.user.username + '-' + idx)" class="users" v-for="(user) in users" :key="user.username">
-         <v-list-item-content style="padding:0">
-          <v-row>
-            <v-col>
-              <v-list-item-title font-weight-bold class="mx-10">
-                 Registered : {{ user.username }}
-              </v-list-item-title>
-            </v-col>
-          </v-row>
-          <v-divider></v-divider>
-        </v-list-item-content>
-      </v-list-item>
+      <h1>Group : {{roomName}}</h1>
       <v-list-item class ="messages" v-for="(item,idx) in $store.getters.messages" :key="item.date">
         <v-list-item-content style="padding:0">
           <v-row>
@@ -62,12 +49,8 @@
 export default {
   name: 'Chatpage',
   data: () => ({
-    roomName: 'Général',
+    roomName: 'General',
     message: '',
-    user: {
-      username: 'anonyme',
-      icon: 'fas fa-hand-middle-finger'
-    },
     users: []
   }),
   sockets: {
@@ -80,7 +63,7 @@ export default {
     userListObtained (val) {
       this.users = val
     },
-    async newMessage (data) { // this function gets triggered once a socket event of `message` is received
+    async newMessage (data) {
       console.log(data.author)
       this.$store.commit('addMessage', {
         date: data.date,
@@ -91,6 +74,9 @@ export default {
         original: data.original,
         showTranslation: false
       })
+    },
+    newUserJoined (data) {
+      this.$store.commit('usersChanged', data)
     }
   },
   watch: {
@@ -106,13 +92,8 @@ export default {
       if (this.message.trim()) {
         const msg = { date: Date.now(), original: this.message, author: this.$store.getters.user }
         this.$socket.emit('message', msg)
-        this.message = '' // clear the box
+        this.message = ''
       }
-    },
-    changeRoom () {
-      this.$socket.emit('changeRoom', 'abc')
-      this.messages = []
-      this.users = []
     },
     async getTranslation (idx) {
       if (!this.$store.getters.messages[idx].showTranslation) {
@@ -128,6 +109,7 @@ export default {
     if (sessionStorage.getItem('user') !== null) {
       this.$store.commit('setUser', JSON.parse(sessionStorage.getItem('user')))
     }
+    this.$socket.emit('userRegistered', this.$store.getters.user)
     if (sessionStorage.getItem('messages') !== null) {
       this.$store.commit('setMessages', JSON.parse(sessionStorage.getItem('messages')))
     }
