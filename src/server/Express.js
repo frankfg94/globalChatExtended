@@ -12,16 +12,16 @@ server({ port }, [
     ctx.socket.join(ctx.data)
   }),
   socket('getUserList', ctx => {
-    // On prend l'envoyeur de la requête, afin de pouvoir l'enlever au tableau lors du filtrage, comme ça il pourra retourner au chat
+    // We take the request's user to send it only to him
     const senderUser = ctx.data
     if (senderUser == null) {
       throw new Error('User is null')
     }
-    // Ce tableau ne doit pas comprendre l'utilisateur qui envoie la requête (afin qu'il puisse se reconnecter)
+    // We remove the person and place it aside
     const filtered = allClients.filter(function (item) {
       return item.username !== senderUser.username
     })
-    ctx.io.emit('userListReceived', filtered)
+    ctx.io.emit('userListReceived', { uList: filtered, allowedUser: JSON.stringify(senderUser) })
   }),
 
   socket('userRegistered', ctx => {

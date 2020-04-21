@@ -58,11 +58,16 @@
 
     <v-content>
       <v-container fluid>
-      <router-view></router-view>
+        <transition name="fade">
+          <router-view></router-view>
+        </transition>
       </v-container>
     </v-content>
   </v-app>
 </template>
+<style scoped>
+
+</style>
 
 <script>
 const axios = require('axios')

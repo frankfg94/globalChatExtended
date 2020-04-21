@@ -11,7 +11,7 @@
       top
       color="error"
     >
-      Ce pseudo existe déjà
+      This username is already taken
       <v-btn
         color="white"
         text
@@ -36,6 +36,7 @@
                     label="Your username"
                     v-model="username"
                     :rules="pseudoRules"
+                    @keyup.enter="submitUnique"
                     type="text"
                     maxlength="12"
                     counter="12"
@@ -93,15 +94,15 @@ export default {
     logged: false,
     snackbar: false,
     icons: [
-      { ic: 'far fa-angry', title: 'En colère' },
-      { ic: 'far fa-laugh-beam', title: 'Content' },
+      { ic: 'far fa-angry', title: 'Angry' },
+      { ic: 'far fa-laugh-beam', title: 'Happy' },
       { ic: 'fas fa-pizza-slice', title: 'Pizza' },
       { ic: 'fas fa-apple-alt', title: 'Apple' }
     ],
     icon: '',
     pseudoRules: [
-      (username) => !!username || 'Un pseudo est requis',
-      (username) => /^(?!\s*$).+/.test(username) || "Le pseudo ne doit pas être constitué d'espaces vides"
+      (username) => !!username || 'A username is required',
+      (username) => /^(?!\s*$).+/.test(username) || 'A username cannot have only whitespaces'
     ]
   }),
 
@@ -113,7 +114,7 @@ export default {
     },
     // Ensure that that an user with the same name is not already connected
     async submitUnique () {
-      this.$socket.emit('getUserList', this.$store.getters.user)
+      this.$socket.emit('getUserList', { username: this.username, icon: this.icon })
     },
     userConnected: function () {
       console.log('log user : ' + sessionStorage.getItem('user'))
@@ -126,14 +127,13 @@ export default {
   },
   sockets: {
     async userListReceived (userList) {
-      console.log('User List : ' + JSON.stringify(userList))
-      const temp = JSON.parse(JSON.stringify(userList))
-      const userFound = temp.find(u => u.username.toUpperCase() === this.username.toUpperCase())
-      console.log('user   ' + userFound)
-      if (userFound !== undefined) {
+      const alreadyConnected = userList.uList.find(u => u.username.toUpperCase() === this.username.toUpperCase())
+      if (alreadyConnected !== undefined) {
         this.snackbar = true
       } else {
-        this.submit()
+        if (JSON.parse(userList.allowedUser).username === this.username) {
+          this.submit()
+        }
       }
     }
   },
@@ -142,12 +142,10 @@ export default {
       if (this.userConnected()) {
         this.$socket.emit('userGone', this.$store.getters.user)
         const user = JSON.parse(sessionStorage.getItem('user'))
-        console.log('Loading previous user' + JSON.stringify(user))
         this.username = user.username
         this.icon = this.icons.find(el => el.ic === user.icon)
       } else {
-      // Choix d'un émoticone aléatoire
-        console.log('else')
+      // Choose a random emoticon
         const randomId = Math.floor(Math.random() * Math.floor(this.icons.length))
         this.icon = this.icons[randomId]
       }
