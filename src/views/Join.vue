@@ -6,6 +6,20 @@
         class="fill-height"
         fluid
       >
+      <v-snackbar
+      v-model="snackbar"
+      top
+      color="error"
+    >
+      Ce pseudo existe déjà
+      <v-btn
+        color="white"
+        text
+        @click="snackbar = false"
+      >
+        Close
+      </v-btn>
+    </v-snackbar>
         <v-row
           align="center"
           justify="center"
@@ -60,7 +74,7 @@
                 <v-btn
                 color="primary"
                 :disabled="!username"
-                @click="submit">C'est parti</v-btn>
+                @click="submitUnique">C'est parti</v-btn>
               </v-card-actions>
             </v-card>
           </v-col>
@@ -77,6 +91,7 @@ export default {
     valid: false,
     username: '',
     logged: false,
+    snackbar: false,
     icons: [
       { ic: 'far fa-angry', title: 'En colère' },
       { ic: 'far fa-laugh-beam', title: 'Content' },
@@ -91,8 +106,13 @@ export default {
   }),
   methods: {
     async submit () {
+      console.log('submit')
       this.$store.commit('setUser', { username: this.username.trim(), icon: this.icon.ic })
       this.$router.push({ name: 'Chat' })
+    },
+    // Ensure that that an user with the same name is not already connected
+    async submitUnique () {
+      this.$socket.emit('getUserList')
     },
     userConnected: function () {
       console.log('log user : ' + sessionStorage.getItem('user'))
@@ -100,6 +120,19 @@ export default {
         return true
       } else {
         return false
+      }
+    }
+  },
+  sockets: {
+    async userListReceived (userList) {
+      console.log('User List : ' + JSON.stringify(userList))
+      const temp = JSON.parse(JSON.stringify(userList))
+      const userFound = temp.find(u => u.username.toUpperCase() === this.username.toUpperCase())
+      console.log('user   ' + userFound)
+      if (userFound !== undefined) {
+        this.snackbar = true
+      } else {
+        this.submit()
       }
     }
   },
@@ -118,4 +151,5 @@ export default {
     })
   }
 }
+
 </script>

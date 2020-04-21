@@ -24,6 +24,27 @@ server({ port }, [
     })
     */
   }),
+  socket('getUserList', ctx => {-
+    // On prend l'envoyeur de la requête, afin de pouvoir l'enlever au tableau lors du filtrage, comme ça il pourra retourner au chat
+    var senderUser = ctx.data;
+    // TODO : Marine replacer avec la vraie liste des utilisateurs
+    const mockUserList =
+    [
+      {
+        username: 'Nicolas',
+        icon: 'far fa-angry'
+      },
+      {
+        username: 'François',
+        icon: 'far fa-angry'
+      }
+    ]
+    // Ce tableau ne doit pas comprendre l'utilisateur qui envoie la requête (afin qu'il puisse se reconnecter)
+    var filtered = mockUserList.filter(function(item) { 
+      return item.username !== senderUser.username
+   });
+    ctx.io.emit('userListReceived', filtered)
+  }),
   socket('userList', ctx => {
     var allClientsFormatted = []
     if (allClients.find(x => x.ctx === ctx) === undefined) {
