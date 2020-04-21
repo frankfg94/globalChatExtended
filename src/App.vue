@@ -12,12 +12,20 @@
       <v-spacer></v-spacer>
 
       <v-btn
+        v-if="logged"
         color="primary"
         font-color="primary"
         @click="langDialogue = !langDialogue"
       >languages
       </v-btn>
-
+       <v-btn
+        v-if="logged"
+        color="primary"
+        font-color="primary"
+        @click="disconnect"
+      >
+      <v-icon>mdi-power</v-icon>
+      </v-btn>
       <v-dialog
         v-model="langDialogue"
         max-width="500px"
@@ -67,16 +75,34 @@ export default {
   data: () => ({
     langDialogue: false,
     supportedLanguages: [],
-    targetLanguage: 'English'
+    targetLanguage: 'English',
+    logged: false
   }),
-
+  watch: {
+    $route (to, from) {
+      this.userConnected()
+    }
+  },
   methods: {
+    userConnected: function () {
+      console.log('log user : ' + sessionStorage.getItem('user'))
+      if (sessionStorage.getItem('user')) {
+        this.logged = true
+      } else {
+        this.logged = false
+      }
+    },
     validateLangChange: function () {
       console.log(this.supportedLanguages.find(item => item.text === this.targetLanguage).ui)
       this.$store.commit('changeLang', this.supportedLanguages.find(item => item.text === this.targetLanguage).ui)
     },
     customSort: function (a, b) {
       return a.text.localeCompare(b.text)
+    },
+    disconnect: function () {
+      this.$router.push({ name: 'Join' })
+      sessionStorage.removeItem('user')
+      this.logged = false
     }
   },
 
@@ -103,6 +129,7 @@ export default {
         console.log(error)
       })
     })
+    this.userConnected()
   }
 }
 </script>
