@@ -2,7 +2,7 @@ import Vue from 'vue'
 import VueRouter from 'vue-router'
 import Home from '../views/Home.vue'
 import Join from '../views/Join.vue'
-import store from '../store/store'
+
 Vue.use(VueRouter)
 
 const routes = [
@@ -16,11 +16,11 @@ const routes = [
     name: 'Chat',
     component: Home,
     beforeEnter: (to, from, next) => {
-      console.log('before enter :' + JSON.stringify(store.getters.user))
-      if (store.getters.user.username !== undefined) {
+      if (sessionStorage.getItem('user') === null) {
         next('/')
+      } else {
+        next()
       }
-      next()
     }
   }
 ]
