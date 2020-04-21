@@ -8,21 +8,11 @@ server({ port }, [
   socket('message', ctx => {
     ctx.io.emit('newMessage', ctx.data)
   }),
-
-  socket('connection', ctx => {
-    /*
-    socket('disconnect', function () {
-      var i = allClients.indexOf(ctx)
-      allClients.splice(i, 1)
-    })
-    */
-    socket('changeRoom', () => {
-      console.log('sans rien')
-      console.log('Client ' + ctx.socket.id + ' joined the room : ' + ctx.data)
-      ctx.join(ctx.data)
-    })
+  socket('changeRoom', ctx => {
+    console.log('sans rien : ' + ctx.data)
+    ctx.socket.join(ctx.data)
+    console.log('Derniere ligne', ctx.socket.rooms)
   }),
-
   socket('userRegistered', ctx => {
     const user = ctx.data
     if (allClients.find(x => x.username === user.username) === undefined) {

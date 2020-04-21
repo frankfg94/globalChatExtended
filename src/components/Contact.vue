@@ -33,6 +33,7 @@ export default {
 
   methods: {
     changeRoom (roomName) {
+      console.log('Emit')
       this.$socket.emit('changeRoom', 'abc')
       this.messages = []
       this.users = []
