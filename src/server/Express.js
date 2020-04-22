@@ -17,11 +17,7 @@ server({ port }, [
     if (senderUser == null) {
       throw new Error('User is null')
     }
-    // We remove the person and place it aside
-    const filtered = allClients.filter(function (item) {
-      return item.username !== senderUser.username
-    })
-    ctx.io.emit('userListReceived', { uList: filtered, allowedUser: JSON.stringify(senderUser) })
+    ctx.io.emit('userListReceived', { uList: allClients, allowedUser: JSON.stringify(senderUser) })
   }),
 
   socket('userRegistered', ctx => {

@@ -107,6 +107,7 @@ export default {
     },
     disconnect: function () {
       this.$router.push({ name: 'Join' })
+      this.$socket.emit('userGone', this.$store.getters.user)
       sessionStorage.removeItem('user')
       this.logged = false
     }
