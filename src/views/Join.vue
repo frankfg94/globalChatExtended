@@ -108,7 +108,6 @@ export default {
 
   methods: {
     async submit () {
-      console.log('submit')
       this.$store.commit('setUser', { username: this.username.trim(), icon: this.icon.ic })
       this.$router.push({ name: 'Chat' })
     },
@@ -117,7 +116,6 @@ export default {
       this.$socket.emit('getUserList', { username: this.username, icon: this.icon })
     },
     userConnected: function () {
-      console.log('log user : ' + sessionStorage.getItem('user'))
       if (sessionStorage.getItem('user')) {
         return true
       } else {
