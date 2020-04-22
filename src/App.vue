@@ -8,7 +8,8 @@
       <div class="d-flex align-center">
         <v-icon>fab fa-yandex-international</v-icon>
       </div>
-
+      <v-spacer></v-spacer>
+      <h1>Global Chat</h1>
       <v-spacer></v-spacer>
 
       <v-btn
@@ -40,8 +41,12 @@
                 v-model="targetLanguage"
                 :items="supportedLanguages"
                 label="Languages"
-                @change="validateLangChange"
               ></v-select>
+              <v-checkbox
+                v-model="alwaysTranslate"
+                label="Automatic translation"
+              />
+
             </v-card-text>
             <v-card-actions>
               <v-btn
@@ -81,9 +86,30 @@ export default {
   data: () => ({
     langDialogue: false,
     supportedLanguages: [],
-    targetLanguage: 'English',
     logged: false
   }),
+  computed: {
+    alwaysTranslate: {
+      get () {
+        return this.$store.getters.alwaysTranslate
+      },
+      set (value) {
+        this.$store.commit('changeAutoTranslate', value)
+      }
+    },
+    targetLanguage: {
+      get () {
+        if (this.supportedLanguages === undefined || this.supportedLanguages.length === 0) {
+          return 'English'
+        } else {
+          return this.supportedLanguages.find(item => item.ui === this.$store.getters.targetLang).text
+        }
+      },
+      set (value) {
+        this.$store.commit('changeLang', this.supportedLanguages.find(item => item.text === value).ui)
+      }
+    }
+  },
   watch: {
     $route (to, from) {
       this.userConnected()
@@ -91,16 +117,11 @@ export default {
   },
   methods: {
     userConnected: function () {
-      console.log('log user : ' + sessionStorage.getItem('user'))
       if (sessionStorage.getItem('user')) {
         this.logged = true
       } else {
         this.logged = false
       }
-    },
-    validateLangChange: function () {
-      console.log(this.supportedLanguages.find(item => item.text === this.targetLanguage).ui)
-      this.$store.commit('changeLang', this.supportedLanguages.find(item => item.text === this.targetLanguage).ui)
     },
     customSort: function (a, b) {
       return a.text.localeCompare(b.text)
@@ -136,6 +157,14 @@ export default {
         console.log(error)
       })
     })
+
+    if (sessionStorage.getItem('targetLang') !== null) {
+      this.$store.commit('changeLang', JSON.parse(sessionStorage.getItem('targetLang')))
+    }
+    if (sessionStorage.getItem('alwaysTranslate') !== null) {
+      this.$store.commit('changeAutoTranslate', JSON.parse(sessionStorage.getItem('alwaysTranslate')))
+    }
+
     this.userConnected()
   }
 }

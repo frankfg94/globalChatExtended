@@ -12,19 +12,22 @@ export const store = new Vuex.Store({
       username: '',
       icon: ''
     },
-    userList: []
+    userList: [],
+    alwaysTranslate: true
   },
 
   mutations: {
     changeLang (state, lang) {
       state.targetLang = lang
+      sessionStorage.setItem('targetLang', JSON.stringify(state.targetLang))
     },
     addMessage (state, msg) {
       console.log(msg)
       state.messages.push(msg)
       sessionStorage.setItem('messages', JSON.stringify(state.messages))
     },
-    changeVisibility (state, idx) {
+    changeVisibility (state, msg) {
+      const idx = state.messages.findIndex(x => x === msg)
       state.messages[idx].showTranslation = !state.messages[idx].showTranslation
     },
     modifyMessage (state, msg) {
@@ -42,12 +45,16 @@ export const store = new Vuex.Store({
     },
     usersChanged (state, users) {
       state.userList = users
+    },
+    changeAutoTranslate (state, bool) {
+      state.alwaysTranslate = bool
+      sessionStorage.setItem('alwaysTranslate', JSON.stringify(state.alwaysTranslate))
     }
   },
 
   actions: {
-    async translateMessage ({ commit, state }, idx) {
-      const msg = state.messages[idx]
+    async translateMessage ({ commit, state }, msg) {
+      // const msg = state.messages[idx]
       msg.ui = state.targetLang
       const key = 'trnsl.1.1.20200419T135148Z.c4fac443bbed2781.b22675d40250840dd99e7ad5aec754f224de4dc1'
       const requestURL = 'https://translate.yandex.net/api/v1.5/tr.json/translate'
@@ -64,11 +71,18 @@ export const store = new Vuex.Store({
         console.log('Translated text: ' + response.data.text)
         msg.translation = response.data.text
         console.log('test ' + msg.translation)
-        commit('modifyMessage', msg)
+        // commit('modifyMessage', msg)
       } else {
         msg.translation = 'Erreur de traduction'
-        commit('modifyMessage', msg)
+        // commit('modifyMessage', msg)
       }
+      return msg
+    },
+    async addMessage ({ commit, state }, msg) {
+      if (msg.showTranslation) {
+        msg = await this.dispatch('translateMessage', msg)
+      }
+      commit('addMessage', msg)
     }
   },
 
@@ -76,7 +90,8 @@ export const store = new Vuex.Store({
     targetLang: state => state.targetLang,
     messages: state => state.messages,
     user: state => state.user,
-    userList: state => state.userList
+    userList: state => state.userList,
+    alwaysTranslate: state => state.alwaysTranslate
   }
 })
 

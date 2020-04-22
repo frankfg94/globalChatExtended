@@ -1,14 +1,14 @@
 <template>
   <v-container>
     <div ref="scrollbar" class="c-chat mb-3 pa-6">
-      <h1>Group : {{roomName}}</h1>
+      <h2>Group : {{roomName}}</h2>
       <v-slide-y-reverse-transition
         class="py-0"
         group
-        tag="v-list"
+        name="messageItem"
       >
-        <template  class ="messages" v-for="(item,idx) in $store.getters.messages">
-          <v-list-item  :key="item.date">
+        <template class ="messages" v-for="(item) in $store.getters.messages">
+          <v-list-item name="messageItem" :key="item.date">
             <v-list-item-content style="padding:0">
               <v-row>
                 <v-col cols="11">
@@ -19,7 +19,7 @@
                   <v-list-item-subtitle class="mx-10" v-if="item.showTranslation">{{ item.translation[0] }}</v-list-item-subtitle>
                 </v-col>
                 <v-col cols="1">
-                  <v-icon medium color=blue @click="getTranslation(idx)">fas fa-language</v-icon>
+                  <v-icon v-if="!$store.getters.alwaysTranslate" medium color=blue @click="getTranslation(item)">fas fa-language</v-icon>
                 </v-col>
               </v-row>
               <v-divider></v-divider>
@@ -82,14 +82,14 @@ export default {
     },
     async newMessage (data) {
       console.log(data.author)
-      this.$store.commit('addMessage', {
+      await this.$store.dispatch('addMessage', {
         date: data.date,
         author: {
           username: data.author.username,
           icon: data.author.icon
         },
         original: data.original,
-        showTranslation: false
+        showTranslation: this.$store.getters.alwaysTranslate
       })
     },
     userListChanged (data) {
@@ -112,11 +112,11 @@ export default {
         this.message = ''
       }
     },
-    async getTranslation (idx) {
-      if (!this.$store.getters.messages[idx].showTranslation) {
-        await this.$store.dispatch('translateMessage', idx)
+    async getTranslation (msg) {
+      if (!msg.showTranslation) {
+        msg = await this.$store.dispatch('translateMessage', msg)
       }
-      this.$store.commit('changeVisibility', idx)
+      this.$store.commit('changeVisibility', msg)
     },
     assignUserList: function () {
       this.$socket.emit('userList', this.$store.getters.user)
