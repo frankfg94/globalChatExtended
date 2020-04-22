@@ -68,13 +68,9 @@ export const store = new Vuex.Store({
       console.log('store ' + msg.translation)
       const responseOK = response && response.status === 200 && response.statusText === 'OK'
       if (responseOK) {
-        console.log('Translated text: ' + response.data.text)
         msg.translation = response.data.text
-        console.log('test ' + msg.translation)
-        // commit('modifyMessage', msg)
       } else {
         msg.translation = 'Erreur de traduction'
-        // commit('modifyMessage', msg)
       }
       return msg
     },

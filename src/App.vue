@@ -9,7 +9,7 @@
         <v-icon>fab fa-yandex-international</v-icon>
       </div>
       <v-spacer></v-spacer>
-      <h1>Global Chat</h1>
+      <h1 class="d-none d-sm-flex">Global Chat</h1>
       <v-spacer></v-spacer>
 
       <v-btn

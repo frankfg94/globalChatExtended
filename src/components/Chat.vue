@@ -2,37 +2,51 @@
   <v-container>
     <div ref="scrollbar" class="c-chat mb-3 pa-6">
       <h2>Group : {{roomName}}</h2>
-      <v-slide-y-reverse-transition
-        class="py-0"
-        group
-        name="messageItem"
-      >
-        <template class ="messages" v-for="(item) in $store.getters.messages">
-          <v-list-item name="messageItem" :key="item.date">
-            <v-list-item-content style="padding:0">
-              <v-row>
-                <v-col cols="11">
-                  <v-list-item-subtitle><v-icon class="mx-2">{{item.author.icon}}</v-icon>{{ item.author.username }}</v-list-item-subtitle>
-                  <v-list-item-title class="mx-10">
-                      {{ item.original }}
-                  </v-list-item-title>
-                  <v-list-item-subtitle class="mx-10" v-if="item.showTranslation">{{ item.translation[0] }}</v-list-item-subtitle>
-                </v-col>
-                <v-col cols="1">
-                  <v-icon v-if="!$store.getters.alwaysTranslate" medium color=blue @click="getTranslation(item)">fas fa-language</v-icon>
-                </v-col>
-              </v-row>
-              <v-divider></v-divider>
-            </v-list-item-content>
+      <v-list>
+        <template class="messages" v-for="(item) in $store.getters.messages">
+          <v-list-item :key="item.date" :value="item">
+            <template>
+              <v-list-item-content>
+                <v-list-item-subtitle>
+                  <v-icon class="mx-2">{{item.author.icon}}</v-icon>
+                  {{ item.author.username }}
+                </v-list-item-subtitle>
+                <v-list-item-title
+                  v-for="(line, index) in item.original.split('\n')"
+                  :key="index"
+                  class="mx-10 wrap-text"
+                >{{ line}}</v-list-item-title>
+                <v-list-item-subtitle class="wrap-text mx-10" v-if="item.showTranslation">
+                  <p
+                    v-for="(line, index) in item.translation[0].split('\n')"
+                    :key="index"
+                  >{{ line }}</p>
+                </v-list-item-subtitle>
+              </v-list-item-content>
+              <v-list-item-action>
+                <v-icon
+                  v-if="!$store.getters.alwaysTranslate"
+                  medium
+                  color="blue"
+                  @click="getTranslation(item)"
+                >fas fa-language</v-icon>
+              </v-list-item-action>
+            </template>
           </v-list-item>
         </template>
-      </v-slide-y-reverse-transition>
+      </v-list>
     </div>
-
-    <div class="c-form mx-6 my-2">
-      <v-flex xs12>
-        <v-text-field label="Your message" outline v-model="message" @keydown.enter="sendMessage"/>
-      </v-flex>
+    <div class="c-form">
+      <v-footer>
+        <v-textarea
+          no-resize
+          label="Your message"
+          rows="1"
+          outline
+          v-model="message"
+          @keydown="inputHandler"
+        />
+      </v-footer>
     </div>
   </v-container>
 </template>
@@ -49,8 +63,13 @@
   top: 0;
   right: 0;
   left: 0;
-  bottom: 60px;
+  bottom: 80px;
   overflow-y: auto;
+}
+.wrap-text {
+  -webkit-line-clamp: unset !important;
+  white-space: normal;
+  overflow-wrap: break-word;
 }
 </style>
 
@@ -96,18 +115,20 @@ export default {
       this.$store.commit('usersChanged', data)
     }
   },
-  watch: {
-    name (newName) {
-      this.name = localStorage.name
-    }
-  },
   methods: {
-    ScrollEnd () {
-      this.$refs.scrollbar.scrollTop = this.$refs.scrollbar.scrollHeight
+    inputHandler (e) {
+      if (e.keyCode === 13 && !e.shiftKey) {
+        e.preventDefault()
+        this.sendMessage()
+      }
     },
     sendMessage: function () {
       if (this.message.trim()) {
-        const msg = { date: Date.now(), original: this.message, author: this.$store.getters.user }
+        const msg = {
+          date: Date.now(),
+          original: this.message,
+          author: this.$store.getters.user
+        }
         this.$socket.emit('message', msg)
         this.message = ''
       }
@@ -130,13 +151,25 @@ export default {
     if (sessionStorage.getItem('user') !== null) {
       this.$store.commit('setUser', JSON.parse(sessionStorage.getItem('user')))
     }
-    this.$socket.emit('userRegistered', this.$store.getters.user) // JSON.parse(sessionStorage.getItem('user')))
+    this.$socket.emit('userRegistered', this.$store.getters.user)
     if (sessionStorage.getItem('messages') !== null) {
-      this.$store.commit('setMessages', JSON.parse(sessionStorage.getItem('messages')))
+      this.$store.commit(
+        'setMessages',
+        JSON.parse(sessionStorage.getItem('messages'))
+      )
     }
   },
-  updated () {
-    this.ScrollEnd()
+  computed: {
+    messageCounter () {
+      return this.$store.getters.messages.length
+    }
+  },
+  watch: {
+    messageCounter () {
+      setTimeout(() => {
+        this.$refs.scrollbar.scrollTop = this.$refs.scrollbar.scrollHeight
+      })
+    }
   }
 }
 </script>
