@@ -8,9 +8,6 @@ server({ port }, [
   socket('message', ctx => {
     ctx.io.emit('newMessage', ctx.data)
   }),
-  socket('changeRoom', ctx => {
-    ctx.socket.join(ctx.data)
-  }),
   socket('getUserList', ctx => {
     // We take the request's user to send it only to him
     const senderUser = ctx.data
