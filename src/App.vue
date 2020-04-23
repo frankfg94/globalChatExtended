@@ -107,6 +107,15 @@ export default {
       },
       set (value) {
         this.$store.commit('changeLang', this.supportedLanguages.find(item => item.text === value).ui)
+        const msgs = this.$store.getters.messages
+        if (msgs !== undefined) {
+          msgs.forEach(async element => {
+            if (element.showTranslation) {
+              element = await this.$store.dispatch('translateMessage', element)
+              this.$store.commit('modifyMessage', element)
+            }
+          })
+        }
       }
     }
   },

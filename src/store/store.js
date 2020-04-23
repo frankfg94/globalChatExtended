@@ -31,7 +31,8 @@ export const store = new Vuex.Store({
       state.messages[idx].showTranslation = !state.messages[idx].showTranslation
     },
     modifyMessage (state, msg) {
-      state.messages[state.messages.findIndex(x => x.date === msg.date)] = msg
+      const idx = state.messages.findIndex(x => x === msg)
+      state.messages.splice(idx, 1, msg)
       sessionStorage.setItem('messages', JSON.stringify(state.messages))
     },
     setUser (state, user) {
@@ -54,7 +55,6 @@ export const store = new Vuex.Store({
 
   actions: {
     async translateMessage ({ commit, state }, msg) {
-      // const msg = state.messages[idx]
       msg.ui = state.targetLang
       const key = 'trnsl.1.1.20200419T135148Z.c4fac443bbed2781.b22675d40250840dd99e7ad5aec754f224de4dc1'
       const requestURL = 'https://translate.yandex.net/api/v1.5/tr.json/translate'
@@ -62,10 +62,9 @@ export const store = new Vuex.Store({
         params: {
           key: key,
           text: msg.original,
-          lang: msg.ui
+          lang: state.targetLang
         }
       })
-      console.log('store ' + msg.translation)
       const responseOK = response && response.status === 200 && response.statusText === 'OK'
       if (responseOK) {
         msg.translation = response.data.text

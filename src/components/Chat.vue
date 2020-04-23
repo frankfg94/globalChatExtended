@@ -5,10 +5,10 @@
       <v-list>
         <v-slide-y-reverse-transition
           group
-          tag="v-list"
+          name="msgitem"
         >
         <template class="messages" v-for="(item) in $store.getters.messages">
-          <v-list-item :key="item.date" :value="item">
+          <v-list-item name="msgitem" :key="item.date" :value="item">
             <template>
               <v-list-item-content>
                 <v-list-item-subtitle>
