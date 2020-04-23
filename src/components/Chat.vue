@@ -20,12 +20,13 @@
                   :key="index"
                   class="mx-10 wrap-text"
                 >{{ line}}</v-list-item-title>
-                <v-list-item-subtitle class="wrap-text mx-10" v-if="item.showTranslation">
+                <v-list-item-subtitle class="wrap-text mx-10 mt-2" v-if="item.showTranslation">
                   <div
                     v-for="(line, index) in item.translation[0].split('\n')"
                     :key="index"
                   >{{ line }}</div>
                 </v-list-item-subtitle>
+                <v-divider class="mt-2"></v-divider>
               </v-list-item-content>
               <v-list-item-action>
                 <v-icon
