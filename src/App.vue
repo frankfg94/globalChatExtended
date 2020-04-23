@@ -18,7 +18,15 @@
       </v-btn>
       <v-dialog v-model="langDialogue" max-width="500px">
         <v-card>
+          <v-card-title>Change target language</v-card-title>
+          <v-card-text>
+            <v-select v-model="targetLanguage" :items="supportedLanguages" label="Languages"></v-select>
             <v-checkbox v-model="alwaysTranslate" label="Automatic translation" />
+            <v-switch v-model="theme" hide-details inset label="Dark Theme"></v-switch>
+          </v-card-text>
+          <v-card-actions>
+            <v-btn color="primary" text @click="langDialogue = false">Close</v-btn>
+          </v-card-actions>
         </v-card>
       </v-dialog>
     </v-app-bar>
