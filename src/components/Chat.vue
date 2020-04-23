@@ -17,41 +17,55 @@
                 </v-list-item-subtitle>
                 <v-list-item-title
                   v-for="(line, index) in item.original.split('\n')"
-                  :key="index"
-                  class="mx-10 wrap-text"
-                >{{ line}}</v-list-item-title>
-                <v-list-item-subtitle class="wrap-text mx-10 mt-2" v-if="item.showTranslation">
-                  <div
-                    v-for="(line, index) in item.translation[0].split('\n')"
                     :key="index"
-                  >{{ line }}</div>
-                </v-list-item-subtitle>
-                <v-divider class="mt-2"></v-divider>
-              </v-list-item-content>
-              <v-list-item-action>
-                <v-icon
-                  v-if="!$store.getters.alwaysTranslate"
-                  medium
-                  color="blue"
-                  @click="getTranslation(item)"
-                >fas fa-language</v-icon>
-              </v-list-item-action>
-            </template>
-          </v-list-item>
-        </template>
+                    class="mx-10 wrap-text"
+                  >{{ line}}</v-list-item-title>
+                  <v-list-item-subtitle class="wrap-text mx-10 mt-2" v-if="item.showTranslation" >
+                    <div
+                      v-for="(line, index) in item.translation[0].split('\n')"
+                      :key="index"
+                    >{{ line }}</div>
+                  </v-list-item-subtitle>
+                  <v-divider class="mt-2"></v-divider>
+                </v-list-item-content>
+                <v-list-item-action>
+                  <v-icon
+                    v-if="!$store.getters.alwaysTranslate"
+                    medium
+                    color="blue"
+                    @click="getTranslation(item)"
+                  >fas fa-language</v-icon>
+                </v-list-item-action>
+              </template>
+            </v-list-item>
+          </template>
         </v-slide-y-reverse-transition>
       </v-list>
     </div>
+    <v-card v-show="showEmo"  id="iconList" color="blue-grey lighten-5" class="px-2 py-2">
+      <div class="scrollable" v-for="(row,idx) in emojiFormatted" :key="idx">
+        <div
+          @click="insertEmoji(emoji)"
+          class="icons-align-horizontal"
+          v-for="(emoji,idx2) in row"
+          :key="idx2"
+        >{{emoji}}</div>
+      </div>
+    </v-card>
     <div class="c-form">
       <v-footer>
         <v-textarea
+          id="ta"
           no-resize
           label="Your message"
           rows="1"
           outline
           v-model="message"
           @keydown="inputHandler"
-        />
+        ></v-textarea>
+        <button @click="showEmo = !showEmo" class="px-5 py-5">
+          <v-icon>far fa-laugh-beam</v-icon>
+        </button>
       </v-footer>
     </div>
   </v-container>
@@ -77,6 +91,17 @@
   white-space: normal;
   overflow-wrap: break-word;
 }
+
+#iconList {
+  position: absolute;
+  bottom: 85px;
+  right: 0;
+}
+
+.icons-align-horizontal {
+  display: inline-block;
+  text-align: center;
+}
 </style>
 
 <script>
@@ -85,7 +110,54 @@ export default {
   data: () => ({
     roomName: 'General',
     message: '',
-    users: []
+    showEmo: false,
+    users: [],
+    emojiList: [
+      '😂',
+      '😂',
+      '😇',
+      '😇',
+      '😇',
+      '😉',
+      '😉',
+      '😫',
+      '🤮',
+      '😩',
+      '🙄',
+      '🙄',
+      '😨',
+      '😨',
+      '🤔',
+      '🤔',
+      '😳',
+      '👺',
+      '🙁',
+      '🤬',
+      '☝',
+      '☝',
+      '🤝',
+      '🤝',
+      '😢',
+      '🧑‍🦱',
+      '👺',
+      '💩',
+      '😥',
+      '😞',
+      '😟',
+      '😟',
+      '😟',
+      '😟',
+      '😟',
+      '🤪',
+      '👻',
+      '🤛',
+      '👩‍🦱',
+      '👸',
+      '🤦',
+      '🚶',
+      '🤦‍♂️'
+    ],
+    emojiFormatted: []
   }),
 
   beforeMount () {
@@ -151,6 +223,28 @@ export default {
     beforeLeaving: function (event) {
       this.$socket.emit('refresh', this.$store.getters.user)
       return 'ok'
+    },
+    genEmojiRows: function (emojiList, rowLimit) {
+      rowLimit++
+      let tabEmoji = []
+      let curTab = []
+      for (let i = 0; i < emojiList.length; i++) {
+        if (i % rowLimit === 0) {
+          tabEmoji.push(curTab)
+          curTab = []
+        } else {
+          curTab.push(emojiList[i])
+        }
+      }
+      tabEmoji = tabEmoji.splice(1)
+      return tabEmoji
+    },
+    insertEmoji: function (emoji) {
+      const cursorIndex = document.getElementById('ta').selectionEnd
+      this.message =
+        this.message.substring(0, cursorIndex) +
+        emoji +
+        this.message.substring(cursorIndex)
     }
   },
   mounted: function () {
@@ -165,6 +259,7 @@ export default {
       )
     }
     this.$refs.scrollbar.scrollTop = this.$refs.scrollbar.scrollHeight
+    this.emojiFormatted = this.genEmojiRows(this.emojiList, 5)
   },
   computed: {
     messageCounter () {
