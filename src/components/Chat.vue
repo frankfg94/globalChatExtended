@@ -32,7 +32,7 @@
                   <v-icon
                     v-if="!$store.getters.alwaysTranslate"
                     medium
-                    color="blue"
+                    color="primary"
                     @click="getTranslation(item)"
                   >fas fa-language</v-icon>
                 </v-list-item-action>
@@ -42,7 +42,7 @@
         </v-slide-y-reverse-transition>
       </v-list>
     </div>
-    <v-card v-show="showEmo"  id="iconList" color="blue-grey lighten-5" class="px-2 py-2">
+    <v-card v-show="showEmo"  id="iconList" color="emojiBg" class="px-2 py-2">
       <div class="scrollable" v-for="(row,idx) in emojiFormatted" :key="idx">
         <div
           @click="insertEmoji(emoji)"

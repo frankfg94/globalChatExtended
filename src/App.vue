@@ -1,61 +1,24 @@
 <template>
   <v-app>
-    <v-app-bar
-      app
-      color="primary"
-      dark
-    >
+    <v-app-bar app color="primary" dark>
       <div class="d-flex align-center">
         <v-icon>fab fa-yandex-international</v-icon>
       </div>
       <v-spacer></v-spacer>
       <h1 class="d-none d-sm-flex">Global Chat</h1>
       <v-spacer></v-spacer>
-
       <v-btn
         v-if="logged"
-        color="blue darken-1"
-        font-color="primary"
+        color="accent"
+        class="textOnPrimary--text"
         @click="langDialogue = !langDialogue"
-      >languages
+      >Settings</v-btn>
+      <v-btn text v-if="logged" class="mx-3" color="white" font-color="primary" @click="disconnect">
+        <v-icon>mdi-power</v-icon>
       </v-btn>
-       <v-btn text
-        v-if="logged"
-        class="mx-3"
-        color=white
-        font-color="primary"
-        @click="disconnect"
-      >
-      <v-icon>mdi-power</v-icon>
-      </v-btn>
-      <v-dialog
-        v-model="langDialogue"
-        max-width="500px"
-      >
+      <v-dialog v-model="langDialogue" max-width="500px">
         <v-card>
-          <v-card-title>
-              Change target language
-            </v-card-title>
-            <v-card-text>
-              <v-select
-                v-model="targetLanguage"
-                :items="supportedLanguages"
-                label="Languages"
-              ></v-select>
-              <v-checkbox
-                v-model="alwaysTranslate"
-                label="Automatic translation"
-              />
-            </v-card-text>
-            <v-card-actions>
-              <v-btn
-                color="primary"
-                text
-                @click="langDialogue = false"
-              >
-                Close
-              </v-btn>
-            </v-card-actions>
+            <v-checkbox v-model="alwaysTranslate" label="Automatic translation" />
         </v-card>
       </v-dialog>
     </v-app-bar>
@@ -70,7 +33,6 @@
   </v-app>
 </template>
 <style scoped>
-
 </style>
 
 <script>
@@ -79,8 +41,7 @@ const axios = require('axios')
 export default {
   name: 'App',
 
-  components: {
-  },
+  components: {},
 
   data: () => ({
     langDialogue: false,
@@ -107,14 +68,22 @@ export default {
     },
     targetLanguage: {
       get () {
-        if (this.supportedLanguages === undefined || this.supportedLanguages.length === 0) {
+        if (
+          this.supportedLanguages === undefined ||
+          this.supportedLanguages.length === 0
+        ) {
           return 'English'
         } else {
-          return this.supportedLanguages.find(item => item.ui === this.$store.getters.targetLang).text
+          return this.supportedLanguages.find(
+            item => item.ui === this.$store.getters.targetLang
+          ).text
         }
       },
       set (value) {
-        this.$store.commit('changeLang', this.supportedLanguages.find(item => item.text === value).ui)
+        this.$store.commit(
+          'changeLang',
+          this.supportedLanguages.find(item => item.text === value).ui
+        )
         const msgs = this.$store.getters.messages
         if (msgs !== undefined) {
           msgs.forEach(async element => {
@@ -124,6 +93,15 @@ export default {
             }
           })
         }
+      }
+    },
+    theme: {
+      get () {
+        return this.$vuetify.theme.dark
+      },
+      set (value) {
+        this.$vuetify.theme.dark = value
+        sessionStorage.setItem('theme', this.$vuetify.theme.dark)
       }
     }
   },
@@ -153,36 +131,51 @@ export default {
 
   mounted: function () {
     this.$nextTick(async function () {
-      const key = 'trnsl.1.1.20200419T135148Z.c4fac443bbed2781.b22675d40250840dd99e7ad5aec754f224de4dc1'
-      const requestURL = 'https://translate.yandex.net/api/v1.5/tr.json/getLangs'
-      await axios.post(requestURL, null, {
-        params: {
-          key: key,
-          ui: 'en'
-        }
-      }).then(response => {
-        const data = response.data.langs
-        const langs = []
-        Object.entries(data).map(function (key) {
-          langs.push({
-            ui: key[0],
-            text: key[1]
-          })
+      const key =
+        'trnsl.1.1.20200419T135148Z.c4fac443bbed2781.b22675d40250840dd99e7ad5aec754f224de4dc1'
+      const requestURL =
+        'https://translate.yandex.net/api/v1.5/tr.json/getLangs'
+      await axios
+        .post(requestURL, null, {
+          params: {
+            key: key,
+            ui: 'en'
+          }
         })
-        this.supportedLanguages = langs.sort(this.customSort)
-      }).catch(error => {
-        console.log(error)
-      })
+        .then(response => {
+          const data = response.data.langs
+          const langs = []
+          Object.entries(data).map(function (key) {
+            langs.push({
+              ui: key[0],
+              text: key[1]
+            })
+          })
+          this.supportedLanguages = langs.sort(this.customSort)
+        })
+        .catch(error => {
+          console.log(error)
+        })
     })
 
     if (sessionStorage.getItem('targetLang') !== null) {
-      this.$store.commit('changeLang', JSON.parse(sessionStorage.getItem('targetLang')))
+      this.$store.commit(
+        'changeLang',
+        JSON.parse(sessionStorage.getItem('targetLang'))
+      )
     }
     if (sessionStorage.getItem('alwaysTranslate') !== null) {
-      this.$store.commit('changeAutoTranslate', JSON.parse(sessionStorage.getItem('alwaysTranslate')))
+      this.$store.commit(
+        'changeAutoTranslate',
+        JSON.parse(sessionStorage.getItem('alwaysTranslate'))
+      )
     }
 
     this.userConnected()
+
+    const val = sessionStorage.getItem('theme')
+    const isTrueSet = (val === 'true')
+    this.$vuetify.theme.dark = isTrueSet
   }
 }
 </script>

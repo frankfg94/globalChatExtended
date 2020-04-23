@@ -11,7 +11,7 @@
             <v-divider class="mt-2"></v-divider>
           </v-list-item-content>
         </v-list-item>
-      <v-list-item @click="changeRoom(item.username)" class ="messages" v-for="(item) in $store.getters.userList" :key="item.username">
+      <v-list-item class ="messages" v-for="(item) in $store.getters.userList" :key="item.username">
           <v-list-item-avatar color=primary>
             <v-icon style="color: white" medium class="mx-5">{{item.icon}}</v-icon>
           </v-list-item-avatar>
@@ -29,15 +29,6 @@
 export default {
   name: 'Join',
   data: () => ({
-  }),
-
-  methods: {
-    changeRoom (roomName) {
-      console.log('Emit')
-      this.$socket.emit('changeRoom', 'abc')
-      this.messages = []
-      this.users = []
-    }
-  }
+  })
 }
 </script>

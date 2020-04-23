@@ -1,7 +1,5 @@
 <template>
-  <v-form
-  v-model="valid" ref="form"
->
+<div class="parent">
   <v-container
         class="fill-height"
         fluid
@@ -31,15 +29,15 @@
           >
             <v-card class="elevation-12">
               <v-card-text>
-                <v-form>
+                <v-form v-model="valid">
                   <v-text-field
                     label="Your username"
                     v-model="username"
                     :rules="pseudoRules"
                     @keyup.enter="submitUnique"
                     type="text"
-                    maxlength="12"
-                    counter="12"
+                    :maxlength="pseudoLength"
+                    :counter="pseudoLength"
                     required
                   />
                   <v-row>
@@ -53,16 +51,17 @@
                         :item-value="icon.ic"
                         :items="icons"
                         required
+                        color="selectEmojiText"
                       >
                         <template slot="item" slot-scope="data">
-                          <v-col cols="8">
+                          <v-col cols="8" class="selectEmojiText--text black--text">
                             {{data.item.title}}
                           </v-col>
-                          <v-col cols="4">
-                            <v-icon>{{data.item.ic}}</v-icon>
+                          <v-col cols="4" >
+                            <v-icon color="selectEmoji">{{data.item.ic}}</v-icon>
                           </v-col>
                         </template>
-                        <template slot="selection" slot-scope="data">
+                        <template class="selectEmojiText--text" slot="selection" slot-scope="data">
                             {{data.item.title}}
                         </template>
                       </v-combobox>
@@ -74,15 +73,30 @@
                 <v-spacer />
                 <v-btn
                 color="primary"
-                :disabled="!username"
+                :disabled="!valid"
                 @click="submitUnique">Let's go</v-btn>
               </v-card-actions>
             </v-card>
           </v-col>
         </v-row>
       </v-container>
-  </v-form>
+   <v-icon class="bg-floating-icon d-none d-sm-flex" color="primary" size="400">fa fa-globe-americas</v-icon>
+</div>
 </template>
+
+<style scoped>
+.bg-floating-icon {
+      position: absolute;
+      left:25%;
+      top:35%;
+      z-index: -1;
+}
+
+.parent {
+position: relative;
+z-index: 0;
+}
+</style>
 
 <script>
 export default {
@@ -93,6 +107,7 @@ export default {
     username: '',
     logged: false,
     snackbar: false,
+    pseudoLength: 20,
     icons: [
       { ic: 'far fa-angry', title: 'Angry' },
       { ic: 'far fa-laugh-beam', title: 'Happy' },
@@ -102,7 +117,7 @@ export default {
     icon: '',
     pseudoRules: [
       (username) => !!username || 'A username is required',
-      (username) => /^(?!\s*$).+/.test(username) || 'A username cannot have only whitespaces'
+      (username) => username.trim() !== '' || 'A username cannot have only whitespaces'
     ]
   }),
 

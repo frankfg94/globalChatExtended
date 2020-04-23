@@ -9,12 +9,14 @@ const routes = [
   {
     path: '/',
     name: 'Join',
-    component: Join
+    component: Join,
+    meta: { title: 'Accueil - Global Chat' }
   },
   {
     path: '/Chat',
     name: 'Chat',
     component: Home,
+    meta: { title: 'Global Chat' },
     beforeEnter: (to, from, next) => {
       if (sessionStorage.getItem('user') === null) {
         next('/')
@@ -24,9 +26,13 @@ const routes = [
     }
   }
 ]
-
 const router = new VueRouter({
   routes
+})
+router.beforeEach((to, from, next) => {
+  document.title = to.meta.title
+
+  next()
 })
 
 export default router
