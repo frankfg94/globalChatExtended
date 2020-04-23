@@ -3,6 +3,10 @@
     <div ref="scrollbar" class="c-chat mb-3 pa-6">
       <h2>Group : {{roomName}}</h2>
       <v-list>
+        <v-slide-y-reverse-transition
+          group
+          tag="v-list"
+        >
         <template class="messages" v-for="(item) in $store.getters.messages">
           <v-list-item :key="item.date" :value="item">
             <template>
@@ -17,10 +21,10 @@
                   class="mx-10 wrap-text"
                 >{{ line}}</v-list-item-title>
                 <v-list-item-subtitle class="wrap-text mx-10" v-if="item.showTranslation">
-                  <p
+                  <div
                     v-for="(line, index) in item.translation[0].split('\n')"
                     :key="index"
-                  >{{ line }}</p>
+                  >{{ line }}</div>
                 </v-list-item-subtitle>
               </v-list-item-content>
               <v-list-item-action>
@@ -34,6 +38,7 @@
             </template>
           </v-list-item>
         </template>
+        </v-slide-y-reverse-transition>
       </v-list>
     </div>
     <div class="c-form">
@@ -158,6 +163,7 @@ export default {
         JSON.parse(sessionStorage.getItem('messages'))
       )
     }
+    this.$refs.scrollbar.scrollTop = this.$refs.scrollbar.scrollHeight
   },
   computed: {
     messageCounter () {
