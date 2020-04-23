@@ -94,6 +94,15 @@ export default {
         return this.$store.getters.alwaysTranslate
       },
       set (value) {
+        if (value) {
+          this.$store.getters.messages.forEach(async msg => {
+            if (msg.translation === undefined || !msg.showTranslation) {
+              msg = await this.$store.dispatch('translateMessage', msg)
+            }
+            msg.showTranslation = true
+          })
+        }
+        sessionStorage.setItem('messages', JSON.stringify(this.$store.getters.messages))
         this.$store.commit('changeAutoTranslate', value)
       }
     },
