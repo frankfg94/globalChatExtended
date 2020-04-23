@@ -46,7 +46,6 @@
                 v-model="alwaysTranslate"
                 label="Automatic translation"
               />
-
             </v-card-text>
             <v-card-actions>
               <v-btn
@@ -98,11 +97,11 @@ export default {
           this.$store.getters.messages.forEach(async msg => {
             if (msg.translation === undefined || !msg.showTranslation) {
               msg = await this.$store.dispatch('translateMessage', msg)
+              this.$store.commit('changeVisibility', msg)
+              this.$store.commit('modifyMessage', msg)
             }
-            msg.showTranslation = true
           })
         }
-        sessionStorage.setItem('messages', JSON.stringify(this.$store.getters.messages))
         this.$store.commit('changeAutoTranslate', value)
       }
     },
