@@ -50,6 +50,20 @@ export const store = new Vuex.Store({
     changeAutoTranslate (state, bool) {
       state.alwaysTranslate = bool
       sessionStorage.setItem('alwaysTranslate', JSON.stringify(state.alwaysTranslate))
+    },
+    removeMessage (state, messageToDelete) {
+      // Remove all the messages with the same text
+      console.log('Deleting with text ' + messageToDelete.original)
+      state.messages = state.messages.filter(x => x.original !== messageToDelete.original)
+      sessionStorage.setItem('messages', JSON.stringify(state.messages))
+    },
+    replaceAllMsg (state, data) {
+      const idx = state.messages.findIndex(x => x.original === data.oldText)
+      if (data.newText) {
+        state.messages[idx].original = data.newText
+        console.log('replaced msg: ' + JSON.stringify(state.messages[idx]))
+        sessionStorage.setItem('messages', JSON.stringify(state.messages))
+      }
     }
   },
 
