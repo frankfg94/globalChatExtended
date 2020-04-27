@@ -6,7 +6,7 @@
       >
       <v-snackbar
       v-model="snackbar"
-      top
+      bottom
       color="error"
     >
       This username is already taken

@@ -31,6 +31,13 @@ server({ port }, [
   socket('userGone', ctx => {
     allClients = allClients.filter(u => u.username !== ctx.data.username)
     ctx.io.emit('userListChanged', allClients)
+  }),
+  socket('deleteMsg', ctx => {
+    ctx.io.emit('onMsgDeleted', ctx.data)
+  }),
+  socket('editMsg', ctx => {
+    console.log('onMsgEdited' + JSON.stringify(ctx.data))
+    ctx.io.emit('onMsgEdited', ctx.data)
   })
 ])
   .then(() => console.log(`Server running at http://localhost:${port}`))
