@@ -122,8 +122,9 @@ export default {
   }),
 
   methods: {
+    // Create the user & go to the chat page
     async submit () {
-      this.$store.commit('setUser', { username: this.username.trim(), icon: this.icon.ic })
+      this.$store.commit('setUser', { username: this.username.trim(), icon: this.icon.ic, group: this.$store.getters.group })
       this.$router.push({ name: 'Chat' })
     },
     // Ensure that that an user with the same name is not already connected

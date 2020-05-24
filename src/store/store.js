@@ -1,7 +1,6 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
 const axios = require('axios')
-
 Vue.use(Vuex)
 
 export const store = new Vuex.Store({
@@ -10,10 +9,13 @@ export const store = new Vuex.Store({
     messages: [],
     user: {
       username: '',
-      icon: ''
+      icon: '',
+      group: 'General'
     },
     userList: [],
-    alwaysTranslate: true
+    alwaysTranslate: true,
+    currentGroup: '',
+    unreadGroups: []
   },
 
   mutations: {
@@ -64,6 +66,21 @@ export const store = new Vuex.Store({
         console.log('replaced msg: ' + JSON.stringify(state.messages[idx]))
         sessionStorage.setItem('messages', JSON.stringify(state.messages))
       }
+    },
+    changeGroup (state, targetGroupObject) {
+      state.currentGroup = targetGroupObject
+      // We tell the user that it must change the group on the screen
+      sessionStorage.setItem('currentGroup', JSON.stringify(state.currentGroup))
+    },
+    clearMsg (state) {
+      state.messages = []
+      sessionStorage.setItem('messages', JSON.stringify(state.messages))
+    },
+    clearNotifications (state, groupTitle) {
+      state.unreadGroups = state.unreadGroups.filter(item => item !== groupTitle)
+    },
+    addNotification (state, notification) {
+      state.unreadGroups.push(notification)
     }
   },
 
@@ -100,7 +117,9 @@ export const store = new Vuex.Store({
     messages: state => state.messages,
     user: state => state.user,
     userList: state => state.userList,
-    alwaysTranslate: state => state.alwaysTranslate
+    alwaysTranslate: state => state.alwaysTranslate,
+    currentGroup: state => state.currentGroup,
+    unreadGroups: state => state.unreadGroups
   }
 })
 

@@ -1,57 +1,82 @@
 <template>
   <v-container>
-     <v-menu v-model="showMenu" :position-x="x" :position-y="y" absolute offset-y >
-                         <v-list>
-                           <v-list-item-group>
-                                <v-list-item @click="deleteMsg(selectedMsg,true)" :disabled="!canDeleteMsg">
-                                  <v-list-item-title   >Delete</v-list-item-title>
-                                </v-list-item>
-                                <v-list-item @click="editMsg(selectedMsg)" :disabled="!canEditMsg">
-                                    <v-list-item-title  >Edit</v-list-item-title>
-                                </v-list-item>
-                                <v-list-item>
-                                    <v-list-item-title @click="copyMsg">Copy</v-list-item-title>
-                                </v-list-item>
-                           </v-list-item-group>
-                  </v-list>
-     </v-menu>
+    <v-menu v-model="showMenu" :position-x="x" :position-y="y" absolute offset-y>
+      <v-list>
+        <v-list-item-group>
+          <v-list-item @click="deleteMsg(selectedMsg,true)" :disabled="!canDeleteMsg">
+            <v-list-item-title>Delete</v-list-item-title>
+          </v-list-item>
+          <v-list-item @click="editMsg(selectedMsg)" :disabled="!canEditMsg">
+            <v-list-item-title>Edit</v-list-item-title>
+          </v-list-item>
+          <v-list-item>
+            <v-list-item-title @click="copyMsg">Copy</v-list-item-title>
+          </v-list-item>
+        </v-list-item-group>
+      </v-list>
+    </v-menu>
     <div ref="scrollbar" class="c-chat mb-3 pa-6">
-      <h2>Group : {{roomName}}</h2>
-      <v-list >
+      <h2>Group : {{$store.getters.currentGroup.title}}</h2>
+      <v-list>
         <v-slide-y-reverse-transition group name="msgitem">
-                <template class="messages" v-for="(item,idx) in $store.getters.messages">
-          <v-list-item-group :key="idx" >
-            <v-list-item @contextmenu="show($event,idx)"  :inactive="true" name="msgitem" :key="item.date" :value="item">
-              <template  >
-                <v-list-item-content>
-                  <v-list-item-subtitle>
-                    <v-icon class="mx-2">{{item.author.icon}}</v-icon>
-                    {{ item.author.username }}
-                  </v-list-item-subtitle>
-                  <v-list-item-title
-                    v-for="(line, index) in item.original.split('\n')"
-                    :key="index"
-                    class="mx-10 wrap-text"
-                  >{{ line}}</v-list-item-title>
-                  <v-list-item-subtitle class="wrap-text mx-10 mt-2" v-if="item.showTranslation">
-                    <div
-                      v-for="(line, index) in item.translation[0].split('\n')"
+          <template class="messages" v-for="(item,idx) in $store.getters.messages">
+            <v-list-item-group :key="idx">
+              <v-list-item
+                v-show="item.groupName === $store.getters.currentGroup.title"
+                @contextmenu="show($event,idx)"
+                :inactive="true"
+                name="msgitem"
+                :key="item.date"
+                :value="item"
+              >
+              <!-- Template for joining leaving a group -->
+                <template v-if="item.groupState">
+                  <v-list-item-content>
+                    <v-list-item-subtitle>
+                      <v-icon class="mx-2">{{item.author.icon}}</v-icon>
+                      {{ item.author.username }}
+                    </v-list-item-subtitle>
+                    <v-list-item-title
+                      v-for="(line, index) in item.original.split('\n')"
                       :key="index"
-                    >{{ line }}</div>
-                  </v-list-item-subtitle>
-                  <v-divider class="mt-2"></v-divider>
-                </v-list-item-content>
-                <v-list-item-action>
-                  <v-icon
-                    v-if="!$store.getters.alwaysTranslate"
-                    medium
-                    color="primary"
-                    @click="getTranslation(item)"
-                  >fas fa-language</v-icon>
-                </v-list-item-action>
-              </template>
-            </v-list-item>
-          </v-list-item-group>
+                      class="text-center"
+                    >{{ line}}</v-list-item-title>
+                    <v-icon v-if="item.groupState === joinConst" class="mx-2">fas fa-sign-in-alt</v-icon>
+                    <v-icon v-else class="mx-2">fas fa-running</v-icon>
+                    <v-divider class="mt-2"></v-divider>
+                  </v-list-item-content>
+                </template>
+                <!-- Template for a standard message -->
+                <template v-else>
+                  <v-list-item-content>
+                    <v-list-item-subtitle>
+                      <v-icon class="mx-2">{{item.author.icon}}</v-icon>
+                      {{ item.author.username }}
+                    </v-list-item-subtitle>
+                    <v-list-item-title
+                      v-for="(line, index) in item.original.split('\n')"
+                      :key="index"
+                      class="mx-10 wrap-text"
+                    >{{ line}}</v-list-item-title>
+                    <v-list-item-subtitle class="wrap-text mx-10 mt-2" v-if="item.showTranslation">
+                      <div
+                        v-for="(line, index) in item.translation[0].split('\n')"
+                        :key="index"
+                      >{{ line }}</div>
+                    </v-list-item-subtitle>
+                    <v-divider class="mt-2"></v-divider>
+                  </v-list-item-content>
+                  <v-list-item-action>
+                    <v-icon
+                      v-if="!$store.getters.alwaysTranslate"
+                      medium
+                      color="primary"
+                      @click="getTranslation(item)"
+                    >fas fa-language</v-icon>
+                  </v-list-item-action>
+                </template>
+              </v-list-item>
+            </v-list-item-group>
           </template>
         </v-slide-y-reverse-transition>
       </v-list>
@@ -164,7 +189,8 @@ export default {
     selectedMsg: 0,
     isEditingMsg: false,
     canEditMsg: false,
-    canDeleteMsg: false
+    canDeleteMsg: false,
+    joinConst: 'join'
   }),
 
   beforeMount () {
@@ -184,8 +210,15 @@ export default {
     userListObtained (val) {
       this.users = val
     },
+    // When a new message is received
     async newMessage (data) {
       console.log(data.author)
+
+      // Add unread message if not in the same room
+      if (data.groupName !== this.$store.getters.currentGroup.title) {
+        this.$store.commit('addNotification', data.groupName)
+      }
+
       await this.$store.dispatch('addMessage', {
         date: data.date,
         author: {
@@ -193,6 +226,7 @@ export default {
           icon: data.author.icon
         },
         original: data.original,
+        groupName: data.groupName,
         showTranslation: this.$store.getters.alwaysTranslate
       })
     },
@@ -204,6 +238,30 @@ export default {
     },
     onMsgDeleted (data) {
       this.deleteMsg(data, false)
+    },
+    // Triggered only for the members of the groups
+    async onGroupChanged (data) {
+      console.log('Received onGroupChanged event!! 😱')
+      const mode = data.mode
+      // const group = data.group
+      const userWhoChanged = data.user
+      const userEnterMsg = 'Hello ' + userWhoChanged.username + ' !'
+      const userLeavesMsg = userWhoChanged.username + ' exited the group'
+      console.log(userWhoChanged)
+      if (this.$store.getters.user.username === userWhoChanged.username) {
+        this.$store.commit('clearMsg')
+      }
+      await this.$store.dispatch('addMessage', {
+        date: Date.now(),
+        groupState: mode,
+        group: this.$store.getters.currentGroup,
+        author: {
+          username: 'The server',
+          icon: 'fas fa-server'
+        },
+        original: mode === this.joinConst ? userEnterMsg : userLeavesMsg,
+        showTranslation: this.$store.getters.alwaysTranslate
+      })
     }
   },
   methods: {
@@ -224,7 +282,8 @@ export default {
         const msg = {
           date: Date.now(),
           original: this.message,
-          author: this.$store.getters.user
+          author: this.$store.getters.user,
+          groupName: this.$store.getters.currentGroup.title
         }
         this.$socket.emit('message', msg)
         this.message = ''
@@ -234,11 +293,18 @@ export default {
     saveEditedMsg (msgOldText, msgNewText, emit) {
       console.log(msgNewText)
       console.log(msgOldText)
-      this.$store.commit({ type: 'replaceAllMsg', oldText: msgOldText, newText: msgNewText })
+      this.$store.commit({
+        type: 'replaceAllMsg',
+        oldText: msgOldText,
+        newText: msgNewText
+      })
       this.message = ''
       this.isEditingMsg = false
       if (emit) {
-        this.$socket.emit('editMsg', { msgOldText: msgOldText, msgNewText: msgNewText })
+        this.$socket.emit('editMsg', {
+          msgOldText: msgOldText,
+          msgNewText: msgNewText
+        })
       }
     },
     async getTranslation (msg) {
@@ -280,7 +346,8 @@ export default {
       e.preventDefault()
       console.log('Show')
       this.selectedMsg = this.$store.getters.messages[item]
-      const userHasAllOptions = this.$store.getters.user.username === this.selectedMsg.author.username
+      const userHasAllOptions =
+        this.$store.getters.user.username === this.selectedMsg.author.username
       console.log('userHasAllOptions : ' + userHasAllOptions)
       this.showMenu = false
       this.x = e.clientX
@@ -308,9 +375,7 @@ export default {
     },
     deleteMsg (msgItem, emit) {
       if (sessionStorage.getItem('messages') !== null) {
-        this.$store.commit(
-          'removeMessage',
-          this.selectedMsg)
+        this.$store.commit('removeMessage', this.selectedMsg)
         if (emit) {
           this.$socket.emit('deleteMsg', msgItem)
         }
@@ -322,6 +387,8 @@ export default {
       this.$store.commit('setUser', JSON.parse(sessionStorage.getItem('user')))
     }
     this.$socket.emit('userRegistered', this.$store.getters.user)
+
+    // We load the previous messages from the session storage
     if (sessionStorage.getItem('messages') !== null) {
       console.log(JSON.parse(sessionStorage.getItem('messages')))
       this.$store.commit(
