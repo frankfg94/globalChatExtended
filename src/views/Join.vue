@@ -9,7 +9,7 @@
       bottom
       color="error"
     >
-      This username is already taken
+      {{errorMsg}}
       <v-btn
         color="white"
         text
@@ -118,7 +118,10 @@ export default {
     pseudoRules: [
       (username) => !!username || 'A username is required',
       (username) => username.trim() !== '' || 'A username cannot have only whitespaces'
-    ]
+    ],
+    errorMsg: '',
+    errorMsgUsername: 'This username is already taken',
+    errorMsgConnection: 'Oops! There seems to be a serverside error 🙄'
   }),
 
   methods: {
@@ -143,12 +146,18 @@ export default {
     async userListReceived (userList) {
       const alreadyConnected = userList.uList.find(u => u.username.toUpperCase() === this.username.toUpperCase())
       if (alreadyConnected !== undefined) {
+        this.errorMsg = this.errorMsgUsername
         this.snackbar = true
       } else {
         if (JSON.parse(userList.allowedUser).username === this.username) {
           this.submit()
         }
       }
+    },
+    connect_error () {
+      // handle server error here
+      this.errorMsg = this.errorMsgConnection
+      this.snackbar = true
     }
   },
   mounted: function () {

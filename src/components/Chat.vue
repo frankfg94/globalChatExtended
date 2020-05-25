@@ -1,5 +1,6 @@
 <template>
   <v-container>
+    <!-- Context menu when right click on a message -->
     <v-menu v-model="showMenu" :position-x="x" :position-y="y" absolute offset-y>
       <v-list>
         <v-list-item-group>
@@ -233,28 +234,31 @@ export default {
     userListChanged (data) {
       this.$store.commit('usersChanged', data)
     },
+    // When an external user edited a message
     onMsgEdited (data) {
-      this.saveEditedMsg(data.msgOldText, data.msgNewText, false)
+      console.log('On Msg Edited ! ✒️')
+      this.saveEditedMsg(data.msgOldText, data.msgNewText, data.groupName, false)
     },
+    // When an external user deleted a message
     onMsgDeleted (data) {
+      console.log('On Msg Deleted ! 🔨')
       this.deleteMsg(data, false)
     },
     // Triggered only for the members of the groups
     async onGroupChanged (data) {
       console.log('Received onGroupChanged event!! 😱')
+      // data format :  { mode: 'join', user: ctx.data.user }
       const mode = data.mode
       // const group = data.group
       const userWhoChanged = data.user
       const userEnterMsg = 'Hello ' + userWhoChanged.username + ' !'
       const userLeavesMsg = userWhoChanged.username + ' exited the group'
-      console.log(userWhoChanged)
-      if (this.$store.getters.user.username === userWhoChanged.username) {
-        this.$store.commit('clearMsg')
-      }
+      console.log('User : ' + JSON.stringify(userWhoChanged))
+
       await this.$store.dispatch('addMessage', {
         date: Date.now(),
         groupState: mode,
-        group: this.$store.getters.currentGroup,
+        groupName: data.newGroupName,
         author: {
           username: 'The server',
           icon: 'fas fa-server'
@@ -262,15 +266,18 @@ export default {
         original: mode === this.joinConst ? userEnterMsg : userLeavesMsg,
         showTranslation: this.$store.getters.alwaysTranslate
       })
+      console.log('Msgs for ' + this.$store.getters.user.username + ' :')
+      console.table(this.$store.getters.messages)
     }
   },
   methods: {
     inputHandler (e) {
+      // Jump line when typing Shift + Enter instead of sending the message
       if (e.keyCode === 13 && !e.shiftKey) {
         e.preventDefault()
         if (this.isEditingMsg) {
           if (this.message.trim()) {
-            this.saveEditedMsg(this.selectedMsg.original, this.message, true)
+            this.saveEditedMsg(this.selectedMsg.original, this.message, this.selectedMsg.groupName, true)
           }
         } else {
           this.sendMessage()
@@ -290,20 +297,22 @@ export default {
       }
     },
     // STEP 2 OF 2
-    saveEditedMsg (msgOldText, msgNewText, emit) {
+    saveEditedMsg (msgOldText, msgNewText, groupTitle, emit) {
       console.log(msgNewText)
       console.log(msgOldText)
       this.$store.commit({
         type: 'replaceAllMsg',
         oldText: msgOldText,
-        newText: msgNewText
+        newText: msgNewText,
+        groupTitle: groupTitle
       })
       this.message = ''
       this.isEditingMsg = false
       if (emit) {
         this.$socket.emit('editMsg', {
           msgOldText: msgOldText,
-          msgNewText: msgNewText
+          msgNewText: msgNewText,
+          groupName: groupTitle
         })
       }
     },
@@ -375,7 +384,7 @@ export default {
     },
     deleteMsg (msgItem, emit) {
       if (sessionStorage.getItem('messages') !== null) {
-        this.$store.commit('removeMessage', this.selectedMsg)
+        this.$store.commit('removeMessage', msgItem)
         if (emit) {
           this.$socket.emit('deleteMsg', msgItem)
         }

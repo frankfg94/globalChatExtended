@@ -43,11 +43,11 @@ server({ port }, [
     ctx.io.emit('userListChanged', allClients)
   }),
   socket('deleteMsg', ctx => {
-    ctx.io.in(ctx.data.user.group).emit('onMsgDeleted', ctx.data)
+    ctx.io.in(ctx.data.groupName).emit('onMsgDeleted', ctx.data)
   }),
   socket('editMsg', ctx => {
     console.log('onMsgEdited' + JSON.stringify(ctx.data))
-    ctx.io.in(ctx.data.user.group).emit('onMsgEdited', ctx.data)
+    ctx.io.in(ctx.data.groupName).emit('onMsgEdited', ctx.data)
   }),
   socket('createGroup', ctx => {
     // console.log('New group in backend : ' + JSON.stringify(ctx.data))
@@ -93,7 +93,7 @@ server({ port }, [
           // ctx.io.to(oldGroup.title).emit('onGroupChanged', { mode: 'leave', user: ctx.data.user })
         }
         // Notify the joined group that the user is here
-        ctx.io.in(group.title).emit('onGroupChanged', { mode: 'join', user: ctx.data.user })
+        ctx.io.in(group.title).emit('onGroupChanged', { mode: 'join', user: ctx.data.user, newGroupName: group.title })
         console.log('Emitted the event onGroupChanged for the group : ' + group.title)
       }
       // console.log(user.username + ' joined the group: ' + group.title)

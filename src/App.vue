@@ -6,6 +6,14 @@
       </div>
       <v-spacer></v-spacer>
       <h1 class="d-none d-sm-flex">Global Chat</h1>
+      <div v-show="showConnectionErrorLogo" >
+         <v-tooltip right>
+          <template v-slot:activator="{ on }">
+            <v-icon v-on="on" class="mx-2" color="error">fas fa-exclamation-triangle</v-icon>
+          </template>
+            <span>Our server has some problems :(</span>
+        </v-tooltip>
+      </div>
       <v-spacer></v-spacer>
       <v-btn
         v-if="logged"
@@ -54,7 +62,8 @@ export default {
   data: () => ({
     langDialogue: false,
     supportedLanguages: [],
-    logged: false
+    logged: false,
+    showConnectionErrorLogo: false
   }),
   computed: {
     alwaysTranslate: {
@@ -136,7 +145,19 @@ export default {
       this.logged = false
     }
   },
+  sockets: {
+    connect_error () {
+      // handle server error here
+      this.showConnectionErrorLogo = true
 
+      // Auto hide the error
+      if (this.showConnectionErrorLogo) {
+        setTimeout(function () {
+          this.showConnectionErrorLogo = false
+        }.bind(this), 6000)
+      }
+    }
+  },
   mounted: function () {
     this.$nextTick(async function () {
       const key =

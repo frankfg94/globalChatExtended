@@ -55,6 +55,7 @@ export const store = new Vuex.Store({
     },
     removeMessage (state, messageToDelete) {
       // Remove all the messages with the same text
+      console.log('Deleting : ' + JSON.stringify(messageToDelete))
       console.log('Deleting with text ' + messageToDelete.original)
       state.messages = state.messages.filter(x => x.original !== messageToDelete.original)
       sessionStorage.setItem('messages', JSON.stringify(state.messages))

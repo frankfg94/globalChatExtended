@@ -230,7 +230,8 @@ export default {
         console.log('1) Changing group to : ' + groupObject.title)
         this.$store.commit('changeGroup', groupObject)
         console.log('Group is now : ' + this.$store.getters.currentGroup.title)
-
+        console.log('Msgs for ' + this.$store.getters.user.username + ' :')
+        console.table(this.$store.getters.messages)
         // Remove unread messages notifications
         this.$store.commit('clearNotifications', groupObject.title)
       }
