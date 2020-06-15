@@ -2,12 +2,12 @@
   <v-navigation-drawer app>
     <v-list rounded>
       <v-list-item-group>
-        <v-list-item @click='changeGroup(groups[0])'>
+        <v-list-item  v-if="this.$store.getters.groupList.length > 0" @click='changeGroup(this.$store.getters.groupList[0])'>
           <v-list-item-avatar color="primary">
-            <v-icon style="color: white" medium class="mx-5">{{groups[0].icon}}</v-icon>
+            <v-icon style="color: white" medium class="mx-5">{{this.$store.getters.groupList[0].icon}}</v-icon>
           </v-list-item-avatar>
           <v-list-item-content>
-            <v-list-item-title  class="mx-2">{{groups[0].title}}</v-list-item-title>
+            <v-list-item-title  class="mx-2">{{this.$store.getters.groupList[0].title}}</v-list-item-title>
             <v-divider class="mt-2"></v-divider>
           </v-list-item-content>
         </v-list-item>
@@ -25,7 +25,7 @@
           </v-list-item-content>
         </v-list-item>
         <h1 class="accent--text">Groups</h1>
-        <div v-for="(g) in groups" :key="g.creationDate.toString()">
+        <div v-for="(g) in this.$store.getters.groupList" :key="g.creationDate.toString()">
           <div  v-if="!g.pinned">
           <v-badge
             bottom
@@ -171,6 +171,7 @@ export default {
     createGroupUsers: '',
     createGroupIcon: '',
     craeteGroupPassword: '',
+    /*
     groups: [
       {
         // The default group
@@ -194,6 +195,7 @@ export default {
         password: 'matrix'
       }
     ],
+    */
     comboboxIcon: '',
     unreadGroups: [],
     groupCreationValid: false,
@@ -212,8 +214,12 @@ export default {
     onGroupCreated (createdGroup) {
       console.log('Group created !')
       if (this.getUsernames(createdGroup.users).find(x => x.username === this.$store.getters.user.username)) {
-        this.groups.push(createdGroup)
+        this.$store.commit('addGroup', createdGroup)
       }
+    },
+    onGroupsLoaded (groupList) {
+      // Updating the group list through our vuex
+      this.$store.commit('setGroups', groupList)
     }
   },
   methods: {
@@ -265,9 +271,16 @@ export default {
         this.$store.commit('clearNotifications', groupObject.title)
       }
     },
+    // Ask the server for the existing groups
+    requestGroups () {
+      this.$socket.emit('requestGroups', this.$store.getters.user)
+    },
     getUnreadMsgCount (groupTitle) {
       return this.$store.getters.unreadGroups.filter(item => item === groupTitle).length
     }
+  },
+  mounted: function () {
+    this.requestGroups()
   }
 }
 </script>

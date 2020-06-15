@@ -15,6 +15,7 @@ export const store = new Vuex.Store({
     userList: [],
     alwaysTranslate: true,
     currentGroup: '',
+    groupList: [],
     unreadGroups: []
   },
 
@@ -73,6 +74,14 @@ export const store = new Vuex.Store({
       // We tell the user that it must change the group on the screen
       sessionStorage.setItem('currentGroup', JSON.stringify(state.currentGroup))
     },
+    setGroups (state, groupList) {
+      state.groupList = groupList
+      // At the moment we don't store locally the groups
+      // sessionStorage.setItem('groupList', JSON.stringify(state.currentGroup))
+    },
+    addGroup (state, newGroup) {
+      state.groupList.push(newGroup)
+    },
     clearMsg (state) {
       state.messages = []
       sessionStorage.setItem('messages', JSON.stringify(state.messages))
@@ -120,7 +129,8 @@ export const store = new Vuex.Store({
     userList: state => state.userList,
     alwaysTranslate: state => state.alwaysTranslate,
     currentGroup: state => state.currentGroup,
-    unreadGroups: state => state.unreadGroups
+    unreadGroups: state => state.unreadGroups,
+    groupList: state => state.groupList
   }
 })
 

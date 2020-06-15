@@ -77,7 +77,7 @@
                 @click="submitUnique">Let's go</v-btn>
               </v-card-actions>
             </v-card>
-            <Globe/>
+            <Globe v-if="globeEnabled"/>
           </v-col>
         </v-row>
       </v-container>
@@ -126,7 +126,8 @@ export default {
     ],
     errorMsg: '',
     errorMsgUsername: 'This username is already taken',
-    errorMsgConnection: 'Oops! There seems to be a serverside error 🙄'
+    errorMsgConnection: 'Oops! There seems to be a serverside error 🙄',
+    globeEnabled: true
   }),
 
   methods: {

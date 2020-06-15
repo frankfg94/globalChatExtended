@@ -2,7 +2,15 @@ const server = require('server')
 const { get, socket } = require('server/router')
 const port = process.env.PORT || 3001
 let allClients = []
-const allGroups = []
+const allGroups = [
+  {
+    // The default group
+    title: 'General',
+    icon: 'fas fa-users',
+    creationDate: 0,
+    pinned: true
+  }
+]
 const defaultGroupName = 'General'
 server({ port }, [
   get('/', ctx => '<h1>Hello you!</h1>'),
@@ -100,6 +108,19 @@ server({ port }, [
     } else {
       console.log('Error, incomplete data, either the group object or the user that wants to join is not defined')
     }
+  }),
+  socket('requestGroups', ctx => {
+    const finalGroups = []
+    console.log(JSON.stringify(allGroups))
+    for (var g in allGroups) {
+      for (var u in allGroups[g].users) {
+        const username = allGroups[g].users[u].username
+        if (username === ctx.data.username) {
+          finalGroups.push(allGroups[g])
+        }
+      }
+    }
+    ctx.socket.emit('onGroupsLoaded', finalGroups)
   })
 ])
   .then(() => console.log(`Server running at http://localhost:${port}`))
