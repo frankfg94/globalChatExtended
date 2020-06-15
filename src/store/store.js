@@ -1,7 +1,6 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
 const axios = require('axios')
-
 Vue.use(Vuex)
 
 export const store = new Vuex.Store({
@@ -10,10 +9,14 @@ export const store = new Vuex.Store({
     messages: [],
     user: {
       username: '',
-      icon: ''
+      icon: '',
+      group: 'General'
     },
     userList: [],
-    alwaysTranslate: true
+    alwaysTranslate: true,
+    currentGroup: '',
+    groupList: [],
+    unreadGroups: []
   },
 
   mutations: {
@@ -50,6 +53,44 @@ export const store = new Vuex.Store({
     changeAutoTranslate (state, bool) {
       state.alwaysTranslate = bool
       sessionStorage.setItem('alwaysTranslate', JSON.stringify(state.alwaysTranslate))
+    },
+    removeMessage (state, messageToDelete) {
+      // Remove all the messages with the same text
+      console.log('Deleting : ' + JSON.stringify(messageToDelete))
+      console.log('Deleting with text ' + messageToDelete.original)
+      state.messages = state.messages.filter(x => x.original !== messageToDelete.original)
+      sessionStorage.setItem('messages', JSON.stringify(state.messages))
+    },
+    replaceAllMsg (state, data) {
+      const idx = state.messages.findIndex(x => x.original === data.oldText)
+      if (data.newText) {
+        state.messages[idx].original = data.newText
+        console.log('replaced msg: ' + JSON.stringify(state.messages[idx]))
+        sessionStorage.setItem('messages', JSON.stringify(state.messages))
+      }
+    },
+    changeGroup (state, targetGroupObject) {
+      state.currentGroup = targetGroupObject
+      // We tell the user that it must change the group on the screen
+      sessionStorage.setItem('currentGroup', JSON.stringify(state.currentGroup))
+    },
+    setGroups (state, groupList) {
+      state.groupList = groupList
+      // At the moment we don't store locally the groups
+      // sessionStorage.setItem('groupList', JSON.stringify(state.currentGroup))
+    },
+    addGroup (state, newGroup) {
+      state.groupList.push(newGroup)
+    },
+    clearMsg (state) {
+      state.messages = []
+      sessionStorage.setItem('messages', JSON.stringify(state.messages))
+    },
+    clearNotifications (state, groupTitle) {
+      state.unreadGroups = state.unreadGroups.filter(item => item !== groupTitle)
+    },
+    addNotification (state, notification) {
+      state.unreadGroups.push(notification)
     }
   },
 
@@ -86,7 +127,10 @@ export const store = new Vuex.Store({
     messages: state => state.messages,
     user: state => state.user,
     userList: state => state.userList,
-    alwaysTranslate: state => state.alwaysTranslate
+    alwaysTranslate: state => state.alwaysTranslate,
+    currentGroup: state => state.currentGroup,
+    unreadGroups: state => state.unreadGroups,
+    groupList: state => state.groupList
   }
 })
 
