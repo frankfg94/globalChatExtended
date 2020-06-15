@@ -9,7 +9,7 @@
       bottom
       color="error"
     >
-      This username is already taken
+      {{errorMsg}}
       <v-btn
         color="white"
         text
@@ -77,10 +77,13 @@
                 @click="submitUnique">Let's go</v-btn>
               </v-card-actions>
             </v-card>
+            <Globe v-if="globeEnabled"/>
           </v-col>
         </v-row>
       </v-container>
+      <!--
    <v-icon class="bg-floating-icon d-none d-sm-flex" color="primary" size="400">fa fa-globe-americas</v-icon>
+!-->
 </div>
 </template>
 
@@ -99,8 +102,10 @@ z-index: 0;
 </style>
 
 <script>
+import Globe from '@/components/Globe'
 export default {
   name: 'Join',
+  components: { Globe },
   data: () => ({
     el: '#app',
     valid: false,
@@ -118,12 +123,17 @@ export default {
     pseudoRules: [
       (username) => !!username || 'A username is required',
       (username) => username.trim() !== '' || 'A username cannot have only whitespaces'
-    ]
+    ],
+    errorMsg: '',
+    errorMsgUsername: 'This username is already taken',
+    errorMsgConnection: 'Oops! There seems to be a serverside error 🙄',
+    globeEnabled: true
   }),
 
   methods: {
+    // Create the user & go to the chat page
     async submit () {
-      this.$store.commit('setUser', { username: this.username.trim(), icon: this.icon.ic })
+      this.$store.commit('setUser', { username: this.username.trim(), icon: this.icon.ic, group: this.$store.getters.group })
       this.$router.push({ name: 'Chat' })
     },
     // Ensure that that an user with the same name is not already connected
@@ -142,12 +152,18 @@ export default {
     async userListReceived (userList) {
       const alreadyConnected = userList.uList.find(u => u.username.toUpperCase() === this.username.toUpperCase())
       if (alreadyConnected !== undefined) {
+        this.errorMsg = this.errorMsgUsername
         this.snackbar = true
       } else {
         if (JSON.parse(userList.allowedUser).username === this.username) {
           this.submit()
         }
       }
+    },
+    connect_error () {
+      // handle server error here
+      this.errorMsg = this.errorMsgConnection
+      this.snackbar = true
     }
   },
   mounted: function () {
