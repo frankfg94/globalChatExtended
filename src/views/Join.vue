@@ -77,10 +77,13 @@
                 @click="submitUnique">Let's go</v-btn>
               </v-card-actions>
             </v-card>
+            <Globe/>
           </v-col>
         </v-row>
       </v-container>
+      <!--
    <v-icon class="bg-floating-icon d-none d-sm-flex" color="primary" size="400">fa fa-globe-americas</v-icon>
+!-->
 </div>
 </template>
 
@@ -99,8 +102,10 @@ z-index: 0;
 </style>
 
 <script>
+import Globe from '@/components/Globe'
 export default {
   name: 'Join',
+  components: { Globe },
   data: () => ({
     el: '#app',
     valid: false,

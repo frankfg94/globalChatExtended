@@ -63,72 +63,90 @@
       </template>
       <!-- The dialog of the group to create -->
       <v-card>
-        <v-card-title class="headline grey lighten-2" primary-title>Let's create a group</v-card-title>
-        <v-card-text>Create a group called {{createGroupName}}</v-card-text>
-        <v-text-field
-          label="Title"
-          :counter="groupTitleLength"
-          :maxLength="groupTitleLength"
-          v-model="createGroupName"
-          required
-          class="mx-10"
-        >{{createGroupName}}</v-text-field>
-        <v-text-field v-model="craeteGroupPassword" label="password (optional)" class="mx-10"></v-text-field>
-        <v-combobox v-model="comboboxIcon" class="mx-10" label="icon" :items="icons">
-          <template  slot="item" slot-scope="data">
-            <v-col cols="8" class="selectEmojiText--text black--text">{{data.item.title}}</v-col>
-            <v-col cols="4">
-              <v-icon   color="selectEmoji">{{data.item.ic}}</v-icon>
-            </v-col>
-          </template>
-          <template
-            class="selectEmojiText--text"
-            slot="selection"
-            slot-scope="data"
-          >{{data.item.title}}</template>
-        </v-combobox>
-        <template>
-          <v-combobox
+        <v-form v-model="groupCreationValid">
+          <v-card-title class="headline grey lighten-2" primary-title>Let's create a group</v-card-title>
+          <v-card-text>Create a group called {{createGroupName}}</v-card-text>
+          <!-- The name of the group to create !-->
+          <v-text-field
+            label="Title"
+            :counter="groupTitleLength"
+            :maxLength="groupTitleLength"
+            :rules="titleRules"
+            v-model="createGroupName"
+            required
             class="mx-10"
-            v-model="createGroupUsers"
-            :items="$store.getters.userList"
-            createGroupUsers
-            flat
-            clearable
-            label="Add some users to this group"
-            multiple
-            prepend-icon="fas fa-filter"
-            solo
-          >
-            <template class="mx-10" v-slot:selection="{ attrs, item, select, selected }">
-              <v-chip
-                v-bind="attrs"
-                :input-value="selected"
-                close
-                @click="select"
-                @click:close="remove(item)"
-              >
-                <span>
-                  <v-icon color="selectEmoji" class="pr-2">{{item.icon}}</v-icon>
-                </span>
-                <strong class="selectEmojiText--text">{{ item.username }}</strong>&nbsp;
-              </v-chip>
-            </template>
-            <!-- General display of the contact list (view the list of data)-->
-            <template slot="item" slot-scope="data">
-              <v-col cols="8" class="selectEmojiText--text">{{data.item.username}}</v-col>
+          >{{createGroupName}}</v-text-field>
+          <v-text-field
+          v-model="craeteGroupPassword"
+          label="password (optional)"
+          class="mx-10">
+          </v-text-field>
+          <!-- Select Emoji -->
+          <v-combobox
+          v-model="comboboxIcon"
+          class="mx-10"
+          label="icon"
+          required
+          :rules="selectEmojiRules"
+          :items="icons">
+            <template  slot="item" slot-scope="data">
+              <v-col cols="8" class="selectEmojiText--text black--text">{{data.item.title}}</v-col>
               <v-col cols="4">
-                <v-icon color="selectEmoji">{{data.item.icon}}</v-icon>
+                <v-icon   color="selectEmoji">{{data.item.ic}}</v-icon>
               </v-col>
             </template>
+            <template
+              class="selectEmojiText--text"
+              slot="selection"
+              slot-scope="data"
+            >{{data.item.title}}</template>
           </v-combobox>
-        </template>
-        <v-divider></v-divider>
-        <v-card-actions>
-          <v-spacer></v-spacer>
-          <v-btn color="primary" text @click="dialogCreateGroup = false">Cancel</v-btn>
-          <v-btn color="primary" text @click="createGroup()">Create the group</v-btn>
-        </v-card-actions>
+          <template>
+            <!-- User list for the group to create !-->
+            <v-combobox
+              class="mx-10"
+              required
+              :rules="addUsersRules"
+              v-model="createGroupUsers"
+              :items="$store.getters.userList"
+              createGroupUsers
+              flat
+              clearable
+              label="Add some users to this group"
+              multiple
+              prepend-icon="fas fa-filter"
+              solo
+            >
+              <template class="mx-10" v-slot:selection="{ attrs, item, select, selected }">
+                <v-chip
+                  v-bind="attrs"
+                  :input-value="selected"
+                  close
+                  @click="select"
+                  @click:close="remove(item)"
+                >
+                  <span>
+                    <v-icon color="selectEmoji" class="pr-2">{{item.icon}}</v-icon>
+                  </span>
+                  <strong class="selectEmojiText--text">{{ item.username }}</strong>&nbsp;
+                </v-chip>
+              </template>
+              <!-- General display of the contact list (view the list of data)-->
+              <template slot="item" slot-scope="data">
+                <v-col cols="8" class="selectEmojiText--text">{{data.item.username}}</v-col>
+                <v-col cols="4">
+                  <v-icon color="selectEmoji">{{data.item.icon}}</v-icon>
+                </v-col>
+              </template>
+            </v-combobox>
+          </template>
+          <v-divider></v-divider>
+          <v-card-actions>
+            <v-spacer></v-spacer>
+            <v-btn color="primary" text @click="dialogCreateGroup = false">Cancel</v-btn>
+            <v-btn color="primary" :disabled="!groupCreationValid" text @click="createGroup()">Create the group</v-btn>
+          </v-card-actions>
+          </v-form>
       </v-card>
     </v-dialog>
   </v-navigation-drawer>
@@ -177,7 +195,18 @@ export default {
       }
     ],
     comboboxIcon: '',
-    unreadGroups: []
+    unreadGroups: [],
+    groupCreationValid: false,
+    selectEmojiRules: [
+      (emoji) => !!emoji || 'A group icon is necessary'
+    ],
+    titleRules: [
+      (text) => !!text || 'A title is required',
+      (text) => text.trim() !== '' || 'A group cannot have only whitespaces'
+    ],
+    addUsersRules: [
+      (users) => !!users || 'At least one user must be in the group'
+    ]
   }),
   sockets: {
     onGroupCreated (createdGroup) {
